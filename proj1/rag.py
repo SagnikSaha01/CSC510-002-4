@@ -3,8 +3,8 @@ from sentence_transformers import SentenceTransformer
 
 PDF_DIR = "./docs"
 PAGE_FILE = "./page.file"
-CHUNK_WORDS = 180       # ≈ short paragraph (150–220 works well)
-TOPK = 6                # sensible default (5–8)
+CHUNK_WORDS = 220       # ≈ short paragraph (150–220 works well)
+TOPK = 8                # sensible default (5–8)
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
@@ -144,14 +144,15 @@ def show_page_table(chunks, metas, scores):
 
 
 
-
+import sys
 
 def ensure_pagefile():
     return update_pagefile(PDF_DIR, PAGE_FILE)
 
 if __name__ == "__main__":
+    query = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "How does HIPAA affect food delivery apps?"
     ix,X,chunks,metas,manifest = ensure_pagefile()
-    ans, scores = query_rag("What is COCOMO?", ix, chunks, k=TOPK)
+    ans, scores = query_rag(query, ix, chunks, k=TOPK)
     show_page_table(chunks, metas, scores)
     print("\n---\n", ans)
 
