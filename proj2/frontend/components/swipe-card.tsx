@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useImperativeHandle, forwardRef } from "react"
 
 interface SwipeCardProps {
   id: number
@@ -18,25 +18,51 @@ interface SwipeCardProps {
   onToggleFavorite?: (id: number) => void
 }
 
-export default function SwipeCard({
-  id,
-  title,
-  description,
-  image,
-  price,
-  distance,
-  rating,
-  category,
-  isFavorite = false,
-  onSwipe,
-  onToggleFavorite,
-}: SwipeCardProps) {
+export interface SwipeCardRef {
+  triggerSwipe: (direction: "left" | "right") => void
+}
+
+const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>((props, ref) => {
+  const {
+    id,
+    title,
+    description,
+    image,
+    price,
+    distance,
+    rating,
+    category,
+    isFavorite = false,
+    onSwipe,
+    onToggleFavorite,
+  } = props
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [rotation, setRotation] = useState(0)
   const [opacity, setOpacity] = useState(1)
   const [isDragging, setIsDragging] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const startPos = useRef({ x: 0, y: 0 })
+
+  // Expose triggerSwipe method to parent component
+  useImperativeHandle(ref, () => ({
+    triggerSwipe: (direction: "left" | "right") => {
+      const targetX = direction === "right" ? 500 : -500
+      const targetRotation = direction === "right" ? 25 : -25
+
+      setPosition({ x: targetX, y: 0 })
+      setRotation(targetRotation)
+      setOpacity(0)
+
+      if (direction === "right" && onToggleFavorite) {
+        onToggleFavorite(id)
+      }
+
+      // Wait for animation to complete before calling onSwipe
+      setTimeout(() => {
+        onSwipe(direction)
+      }, 300)
+    }
+  }))
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true)
@@ -214,4 +240,8 @@ export default function SwipeCard({
       </div>
     </div>
   )
-}
+})
+
+SwipeCard.displayName = "SwipeCard"
+
+export default SwipeCard
