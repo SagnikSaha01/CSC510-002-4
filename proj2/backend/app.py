@@ -8,7 +8,6 @@ from openai import OpenAI
 # Load environment variables from .env file
 load_dotenv()
 
-# Initialize the Flask app
 app = Flask(__name__)
 # Enable CORS for all routes, allowing the frontend to connect
 CORS(app)
