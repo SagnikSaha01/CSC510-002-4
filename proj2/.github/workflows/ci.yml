@@ -13,7 +13,10 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-
+      # --- ADD THIS TEMPORARY STEP ---
+      - name: List all files in structure
+        run: ls -R
+      # -------------------------------
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
