@@ -16,6 +16,7 @@ build/
 # --- Secret Files ---
 # Ignore the .env file containing secret keys
 .env
+.claude/
 
 # --- Python Bytecode & Cache ---
 __pycache__/
