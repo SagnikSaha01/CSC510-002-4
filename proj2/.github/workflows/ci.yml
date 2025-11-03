@@ -17,30 +17,33 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Or your specific version
+          python-version: '3.11'
 
+      # FIX: Changed the path to your requirements.txt
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
         working-directory: ./proj2/vibe-eats-backend
 
+      # FIX: Changed the path to where the .env file is created
       - name: Create dummy .env file
         run: |
           echo "SUPABASE_URL=http://fake.url" >> .env
           echo "SUPABASE_KEY=fake_key" >> .env
-          echo "OPENAI_API_KEY=fake_key" >> .env # <-- ADDED THIS LINE
-        working-directory: ./vibe-eats-backend
+          echo "OPENAI_API_KEY=fake_key" >> .env
+        working-directory: ./proj2/vibe-eats-backend
 
+      # FIX: Changed the path to where pytest is run
       - name: Run tests with coverage
         run: |
-          # ADDED --cov=ai_service TO THIS LINE
           pytest --cov=restaurantRoutes --cov=extensions --cov=ai_service --cov-report=xml
-        working-directory: ./vibe-eats-backend
+        working-directory: ./proj2/vibe-eats-backend
 
+      # FIX: Changed the path to the coverage.xml file
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-          file: ./vibe-eats-backend/coverage.xml
+          file: ./proj2/vibe-eats-backend/coverage.xml
