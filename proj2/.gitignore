@@ -1,0 +1,38 @@
+# --- Python Virtual Environments ---
+# Standard venv
+venv/
+env/
+.venv/
+.env/
+
+# Pip/Conda
+*.egg-info/
+.eggs/
+dist/
+build/
+*.tar.gz
+*.whl
+
+# --- Secret Files ---
+# Ignore the .env file containing secret keys
+.env
+
+# --- Python Bytecode & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- IDE / Editor Files ---
+# VSCode
+.vscode/
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+
+# --- Operating System Files ---
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
