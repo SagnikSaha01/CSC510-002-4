@@ -7,4 +7,4 @@ Repo for CSC 510 at NCSU
 
 [![Python CI](https://github.com/SagnikSaha01/CSC510-002-4/actions/workflows/ci.yml/badge.svg)](https://github.com/SagnikSaha01/CSC510-002-4/actions/workflows/ci.yml)
 
-[![codecov](https://codecov.io/github/SagnikSaha01/CSC510-002-4/graph/badge.svg?token=GBU37PKCWF)](https://codecov.io/github/SagnikSaha01/CSC510-002-4)
+[![codecov](https://codecov.io/github/SagnikSaha01/CSC510-002-4/branch/development/graph/badge.svg?token=GBU37PKCWF)](https://codecov.io/github/SagnikSaha01/CSC510-002-4)
