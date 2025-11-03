@@ -9,5 +9,6 @@ Repo for CSC 510 at NCSU
 
 [![codecov](https://codecov.io/github/SagnikSaha01/CSC510-002-4/branch/development/graph/badge.svg?token=GBU37PKCWF)](https://codecov.io/github/SagnikSaha01/CSC510-002-4)
 
-[![DOI](https://zenodo.org/badge/17518126.svg)](https://doi.org/10.5281/zenodo.17518126)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17518126.svg)](https://doi.org/10.5281/zenodo.17518126)
+
 
