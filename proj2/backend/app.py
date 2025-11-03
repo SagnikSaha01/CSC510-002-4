@@ -9,7 +9,9 @@ def create_app():
 
     # Import and register the blueprint
     from restaurantRoutes import api_blueprint
+    from cartRoutes import cart_bp
     app.register_blueprint(api_blueprint, url_prefix='/api')
+    app.register_blueprint(cart_bp, url_prefix='/api')
 
     @app.route("/")
     def home():
