@@ -2,4 +2,7 @@ Flask
 supabase
 python-dotenv
 flask-cors
+pytest
+pytest-mock
+pytest-cov
 openai
