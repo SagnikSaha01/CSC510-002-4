@@ -1,14 +1,15 @@
 import json
 from extensions import openai_client
 
+
 def get_ai_recommendations(mood_text, restaurants_data):
     """
     Handles all AI-related logic for generating recommendations.
     """
-    
+
     # 1. Format the restaurant data for the AI
     restaurant_prompt_data = _format_restaurants_for_ai(restaurants_data)
-    
+
     # 2. Create the prompt
     prompt = f"""You are a food recommendation AI for "Vibe Eats". Based on the user's mood/feeling, recommend personalized restaurant dishes.
 
@@ -47,16 +48,19 @@ Important: Return ONLY the JSON array, no other text."""
     completion = openai_client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are a helpful food recommendation assistant that returns only valid JSON."},
-            {"role": "user", "content": prompt}
+            {
+                "role": "system",
+                "content": "You are a helpful food recommendation assistant that returns only valid JSON.",
+            },
+            {"role": "user", "content": prompt},
         ],
         temperature=0.7,
-        max_tokens=2000
+        max_tokens=2000,
     )
-    
+
     # 4. Parse and return the response
     ai_response = completion.choices[0].message.content.strip()
-    
+
     # Remove markdown code blocks if present
     if ai_response.startswith("```json"):
         ai_response = ai_response[7:]
@@ -72,19 +76,20 @@ Important: Return ONLY the JSON array, no other text."""
 
 # --- Helper Function (moved from your app.py) ---
 
+
 def _format_restaurants_for_ai(restaurants):
     """Format restaurant data for the AI prompt."""
     formatted = []
     for restaurant in restaurants:
         restaurant_info = f"Restaurant: {restaurant.get('name', 'Unknown')} - {restaurant.get('address', '')}"
-        if 'menu_items' in restaurant and restaurant['menu_items']:
+        if "menu_items" in restaurant and restaurant["menu_items"]:
             dishes = []
-            for item in restaurant['menu_items']:
-                name = item.get('name', 'Unknown')
-                description = item.get('description', '')
-                category = item.get('category', '')
-                price = item.get('price', 0)
-                image_url = item.get('image_url', '/placeholder.jpg')
+            for item in restaurant["menu_items"]:
+                name = item.get("name", "Unknown")
+                description = item.get("description", "")
+                category = item.get("category", "")
+                price = item.get("price", 0)
+                image_url = item.get("image_url", "/placeholder.jpg")
                 dish = f"- {name} ({category}): {description} (${price}) [image_url: {image_url}]"
                 dishes.append(dish)
             restaurant_info += "\n" + "\n".join(dishes)
