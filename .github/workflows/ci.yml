@@ -55,13 +55,29 @@ jobs:
 
       - name: Run tests and generate coverage report
         run: |
-          # Step 1: Run pytest under the 'coverage' tool
-          # I also fixed the filenames to match your refactor
-          coverage run --source=app,run,extensions,ai_service,routes_restaurant,routes_cart,routes_ai -m pytest
-          
+          # Step 1: Run pytest under the 'coverage' tool, specifying all your source files
+          # Including tests for Google auth (backend), AI service, cart routes, and restaurant routes
+          coverage run --source=app,run,extensions,ai_service,restaurantRoutes,cartRoutes,routes_ai -m pytest tests/test_google_auth.py tests/test_ai_service.py tests/test_cart_routes.py tests/test_routes.py
+
           # Step 2: Generate the XML report that Codecov needs
           coverage xml
         working-directory: ./proj2/backend
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install frontend dependencies
+        run: pnpm install
+        working-directory: ./proj2/frontend
+
+      - name: Run frontend tests (Google auth)
+        run: pnpm test __tests__/components/google-sign-in-button.test.tsx __tests__/contexts/auth-context.test.tsx
+        working-directory: ./proj2/frontend
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
