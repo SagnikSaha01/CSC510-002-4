@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, request, make_response
 from extensions import supabase
 import ai_service  # <-- Import your new service file
 import json
+
 # 1. Create a Blueprint object
 # 'api' is the name of this blueprint.
 api_blueprint = Blueprint("api", __name__)

@@ -28,6 +28,7 @@ import json
 # MOCK DATA AND FIXTURES
 # =============================================================================
 
+
 @pytest.fixture
 def mock_user_data():
     """Mock user data returned from Supabase after successful authentication."""
@@ -37,10 +38,10 @@ def mock_user_data():
         "user_metadata": {
             "full_name": "Test User",
             "avatar_url": "https://example.com/avatar.jpg",
-            "email": "testuser@example.com"
+            "email": "testuser@example.com",
         },
         "aud": "authenticated",
-        "created_at": "2024-01-01T00:00:00.000Z"
+        "created_at": "2024-01-01T00:00:00.000Z",
     }
 
 
@@ -53,7 +54,7 @@ def mock_session_data(mock_user_data):
         "expires_in": 3600,
         "expires_at": 1704067200,
         "token_type": "bearer",
-        "user": mock_user_data
+        "user": mock_user_data,
     }
 
 
@@ -63,15 +64,16 @@ def mock_oauth_response():
     return {
         "data": {
             "url": "https://accounts.google.com/o/oauth2/auth?client_id=...",
-            "provider": "google"
+            "provider": "google",
         },
-        "error": None
+        "error": None,
     }
 
 
 # =============================================================================
 # AUTH CONTEXT TESTS
 # =============================================================================
+
 
 class TestAuthContext:
     """Test suite for authentication context functionality."""
@@ -84,11 +86,7 @@ class TestAuthContext:
         # - session is null initially
         # - loading is true initially
 
-        initial_state = {
-            "user": None,
-            "session": None,
-            "loading": True
-        }
+        initial_state = {"user": None, "session": None, "loading": True}
 
         assert initial_state["user"] is None
         assert initial_state["session"] is None
@@ -97,13 +95,7 @@ class TestAuthContext:
     def test_auth_context_provides_methods(self):
         """Test that auth context provides required authentication methods."""
         # This test validates the interface of the auth context
-        required_methods = [
-            "signInWithGoogle",
-            "signOut",
-            "user",
-            "session",
-            "loading"
-        ]
+        required_methods = ["signInWithGoogle", "signOut", "user", "session", "loading"]
 
         # In a real frontend test, you'd verify these are all accessible
         # from the useAuth() hook
@@ -115,7 +107,7 @@ class TestAuthContext:
         mock_get_session = MagicMock()
         mock_get_session.return_value = {
             "data": {"session": mock_session_data},
-            "error": None
+            "error": None,
         }
 
         # Simulate getting initial session
@@ -130,10 +122,7 @@ class TestAuthContext:
         """Test handling when no initial session exists."""
         # Mock no session
         mock_get_session = MagicMock()
-        mock_get_session.return_value = {
-            "data": {"session": None},
-            "error": None
-        }
+        mock_get_session.return_value = {"data": {"session": None}, "error": None}
 
         result = mock_get_session()
 
@@ -145,6 +134,7 @@ class TestAuthContext:
 # GOOGLE SIGN-IN TESTS
 # =============================================================================
 
+
 class TestGoogleSignIn:
     """Test suite for Google OAuth sign-in functionality."""
 
@@ -155,12 +145,12 @@ class TestGoogleSignIn:
         mock_sign_in.return_value = mock_oauth_response
 
         # Simulate sign-in call
-        result = mock_sign_in({
-            "provider": "google",
-            "options": {
-                "redirectTo": "http://localhost:3000/auth/callback"
+        result = mock_sign_in(
+            {
+                "provider": "google",
+                "options": {"redirectTo": "http://localhost:3000/auth/callback"},
             }
-        })
+        )
 
         assert result["data"]["provider"] == "google"
         assert result["error"] is None
@@ -173,19 +163,16 @@ class TestGoogleSignIn:
         mock_sign_in = MagicMock()
         error_response = {
             "data": None,
-            "error": {
-                "message": "OAuth provider error",
-                "status": 400
-            }
+            "error": {"message": "OAuth provider error", "status": 400},
         }
         mock_sign_in.return_value = error_response
 
-        result = mock_sign_in({
-            "provider": "google",
-            "options": {
-                "redirectTo": "http://localhost:3000/auth/callback"
+        result = mock_sign_in(
+            {
+                "provider": "google",
+                "options": {"redirectTo": "http://localhost:3000/auth/callback"},
             }
-        })
+        )
 
         assert result["data"] is None
         assert result["error"] is not None
@@ -197,10 +184,7 @@ class TestGoogleSignIn:
         mock_sign_in.return_value = {"data": {}, "error": None}
 
         redirect_url = "http://localhost:3000/auth/callback"
-        mock_sign_in({
-            "provider": "google",
-            "options": {"redirectTo": redirect_url}
-        })
+        mock_sign_in({"provider": "google", "options": {"redirectTo": redirect_url}})
 
         # Verify the call was made with correct redirect
         call_args = mock_sign_in.call_args[0][0]
@@ -210,7 +194,9 @@ class TestGoogleSignIn:
         """Test handling of network errors during sign-in."""
         # Simulate network error
         mock_sign_in = MagicMock()
-        mock_sign_in.side_effect = Exception("Network error: Unable to reach auth server")
+        mock_sign_in.side_effect = Exception(
+            "Network error: Unable to reach auth server"
+        )
 
         with pytest.raises(Exception) as exc_info:
             mock_sign_in({"provider": "google"})
@@ -222,6 +208,7 @@ class TestGoogleSignIn:
 # AUTH CALLBACK TESTS
 # =============================================================================
 
+
 class TestAuthCallback:
     """Test suite for OAuth callback handling."""
 
@@ -231,7 +218,7 @@ class TestAuthCallback:
         mock_exchange = MagicMock()
         mock_exchange.return_value = {
             "data": {"session": mock_session_data},
-            "error": None
+            "error": None,
         }
 
         # Simulate exchange with auth code
@@ -249,10 +236,7 @@ class TestAuthCallback:
         mock_exchange = MagicMock()
         mock_exchange.return_value = {
             "data": None,
-            "error": {
-                "message": "Invalid authorization code",
-                "status": 400
-            }
+            "error": {"message": "Invalid authorization code", "status": 400},
         }
 
         result = mock_exchange("invalid-code")
@@ -266,10 +250,7 @@ class TestAuthCallback:
         mock_exchange = MagicMock()
         mock_exchange.return_value = {
             "data": None,
-            "error": {
-                "message": "Authorization code has expired",
-                "status": 401
-            }
+            "error": {"message": "Authorization code has expired", "status": 401},
         }
 
         result = mock_exchange("expired-code")
@@ -282,7 +263,7 @@ class TestAuthCallback:
         callback_url = "http://localhost:3000/auth/callback?code=abc123&state=xyz789"
 
         # Simulate URL parsing
-        code = callback_url.split('code=')[1].split('&')[0]
+        code = callback_url.split("code=")[1].split("&")[0]
 
         assert code == "abc123"
 
@@ -291,15 +272,19 @@ class TestAuthCallback:
         callback_url = "http://localhost:3000/auth/callback?error=access_denied"
 
         # Simulate URL parsing
-        code = callback_url.split('code=')[1].split('&')[0] if 'code=' in callback_url else ''
+        code = (
+            callback_url.split("code=")[1].split("&")[0]
+            if "code=" in callback_url
+            else ""
+        )
 
-        assert code == ''
+        assert code == ""
 
     def test_parse_callback_url_with_error(self):
         """Test parsing error from callback URL."""
         callback_url = "http://localhost:3000/auth/callback?error=access_denied&error_description=User+denied+access"
 
-        has_error = 'error=' in callback_url
+        has_error = "error=" in callback_url
 
         assert has_error is True
 
@@ -307,6 +292,7 @@ class TestAuthCallback:
 # =============================================================================
 # SIGN-OUT TESTS
 # =============================================================================
+
 
 class TestSignOut:
     """Test suite for sign-out functionality."""
@@ -327,10 +313,7 @@ class TestSignOut:
         # Mock sign-out error
         mock_sign_out = MagicMock()
         mock_sign_out.return_value = {
-            "error": {
-                "message": "Failed to sign out",
-                "status": 500
-            }
+            "error": {"message": "Failed to sign out", "status": 500}
         }
 
         result = mock_sign_out()
@@ -355,6 +338,7 @@ class TestSignOut:
 # SESSION MANAGEMENT TESTS
 # =============================================================================
 
+
 class TestSessionManagement:
     """Test suite for session management and persistence."""
 
@@ -363,9 +347,7 @@ class TestSessionManagement:
         # Mock subscription
         mock_listener = MagicMock()
         mock_subscription = MagicMock()
-        mock_listener.return_value = {
-            "data": {"subscription": mock_subscription}
-        }
+        mock_listener.return_value = {"data": {"subscription": mock_subscription}}
 
         result = mock_listener(lambda event, session: None)
 
@@ -404,7 +386,13 @@ class TestSessionManagement:
 
     def test_session_token_structure(self, mock_session_data):
         """Test that session contains required token fields."""
-        required_fields = ["access_token", "refresh_token", "expires_in", "token_type", "user"]
+        required_fields = [
+            "access_token",
+            "refresh_token",
+            "expires_in",
+            "token_type",
+            "user",
+        ]
 
         for field in required_fields:
             assert field in mock_session_data
@@ -423,6 +411,7 @@ class TestSessionManagement:
 # ERROR HANDLING TESTS
 # =============================================================================
 
+
 class TestErrorHandling:
     """Test suite for error scenarios and edge cases."""
 
@@ -431,10 +420,7 @@ class TestErrorHandling:
         mock_sign_in = MagicMock()
         mock_sign_in.return_value = {
             "data": None,
-            "error": {
-                "message": "OAuth provider not configured",
-                "status": 500
-            }
+            "error": {"message": "OAuth provider not configured", "status": 500},
         }
 
         result = mock_sign_in({"provider": "google"})
@@ -466,7 +452,7 @@ class TestErrorHandling:
         # In a real scenario, you'd test that the app handles missing env vars gracefully
         env_vars = {
             "NEXT_PUBLIC_SUPABASE_URL": None,
-            "NEXT_PUBLIC_SUPABASE_ANON_KEY": None
+            "NEXT_PUBLIC_SUPABASE_ANON_KEY": None,
         }
 
         # Should detect missing configuration
@@ -482,7 +468,7 @@ class TestErrorHandling:
 
         mock_get_session.return_value = {
             "data": {"session": expired_session},
-            "error": None
+            "error": None,
         }
 
         result = mock_get_session()
@@ -495,14 +481,11 @@ class TestErrorHandling:
 # INTEGRATION TESTS
 # =============================================================================
 
+
 class TestGoogleAuthIntegration:
     """Integration tests for complete authentication flows."""
 
-    def test_complete_sign_in_flow(
-        self,
-        mock_oauth_response,
-        mock_session_data
-    ):
+    def test_complete_sign_in_flow(self, mock_oauth_response, mock_session_data):
         """Test complete sign-in flow from start to finish."""
         # Step 1: Initiate OAuth
         mock_sign_in = MagicMock()
@@ -514,7 +497,7 @@ class TestGoogleAuthIntegration:
         mock_exchange = MagicMock()
         mock_exchange.return_value = {
             "data": {"session": mock_session_data},
-            "error": None
+            "error": None,
         }
         exchange_result = mock_exchange("auth-code")
         assert exchange_result["error"] is None
@@ -523,7 +506,7 @@ class TestGoogleAuthIntegration:
         mock_get_session = MagicMock()
         mock_get_session.return_value = {
             "data": {"session": mock_session_data},
-            "error": None
+            "error": None,
         }
         session_result = mock_get_session()
         assert session_result["data"]["session"] is not None
@@ -538,10 +521,7 @@ class TestGoogleAuthIntegration:
 
         # Step 2: Verify session is cleared
         mock_get_session = MagicMock()
-        mock_get_session.return_value = {
-            "data": {"session": None},
-            "error": None
-        }
+        mock_get_session.return_value = {"data": {"session": None}, "error": None}
         session_result = mock_get_session()
         assert session_result["data"]["session"] is None
 
@@ -550,6 +530,7 @@ class TestGoogleAuthIntegration:
 # SECURITY TESTS
 # =============================================================================
 
+
 class TestSecurityConsiderations:
     """Test suite for security-related aspects of authentication."""
 
@@ -557,13 +538,13 @@ class TestSecurityConsiderations:
         """Test that redirect URLs are validated."""
         valid_urls = [
             "http://localhost:3000/auth/callback",
-            "https://myapp.com/auth/callback"
+            "https://myapp.com/auth/callback",
         ]
 
         invalid_urls = [
             "http://malicious-site.com/callback",
             "javascript:alert('xss')",
-            ""
+            "",
         ]
 
         # In a real test, you'd verify only whitelisted URLs are allowed
@@ -598,25 +579,20 @@ class TestSecurityConsiderations:
 # COMPONENT BEHAVIOR TESTS
 # =============================================================================
 
+
 class TestGoogleSignInButton:
     """Test suite for Google Sign-In button component behavior."""
 
     def test_button_initial_state(self):
         """Test button's initial state."""
-        button_state = {
-            "isLoading": False,
-            "text": "Continue with Google"
-        }
+        button_state = {"isLoading": False, "text": "Continue with Google"}
 
         assert button_state["isLoading"] is False
         assert "Google" in button_state["text"]
 
     def test_button_loading_state(self):
         """Test button's loading state during sign-in."""
-        button_state = {
-            "isLoading": True,
-            "text": "Signing in..."
-        }
+        button_state = {"isLoading": True, "text": "Signing in..."}
 
         assert button_state["isLoading"] is True
         assert "Signing in" in button_state["text"]
@@ -639,6 +615,7 @@ class TestGoogleSignInButton:
 # =============================================================================
 # UTILITY FUNCTION TESTS
 # =============================================================================
+
 
 class TestAuthUtilityFunctions:
     """Test suite for authentication utility functions."""
@@ -672,17 +649,21 @@ class TestAuthUtilityFunctions:
         error_codes = {
             "authentication_failed": "Authentication failed. Please try again.",
             "callback_failed": "Failed to complete sign-in. Please try again.",
-            "access_denied": "Access was denied. Please grant permissions to continue."
+            "access_denied": "Access was denied. Please grant permissions to continue.",
         }
 
         assert "failed" in error_codes["authentication_failed"].lower()
-        assert "callback" in error_codes["callback_failed"].lower() or "sign-in" in error_codes["callback_failed"].lower()
+        assert (
+            "callback" in error_codes["callback_failed"].lower()
+            or "sign-in" in error_codes["callback_failed"].lower()
+        )
         assert "denied" in error_codes["access_denied"].lower()
 
 
 # =============================================================================
 # EDGE CASES AND CORNER CASES
 # =============================================================================
+
 
 class TestEdgeCases:
     """Test suite for edge cases and corner cases."""
@@ -706,17 +687,17 @@ class TestEdgeCases:
     def test_callback_handling_with_missing_code(self):
         """Test callback page handling when code is missing."""
         url = "http://localhost:3000/auth/callback"
-        code = url.split('code=')[1].split('&')[0] if 'code=' in url else ''
+        code = url.split("code=")[1].split("&")[0] if "code=" in url else ""
 
-        assert code == ''
+        assert code == ""
 
     def test_callback_handling_with_empty_code(self):
         """Test callback page handling when code is empty."""
         url = "http://localhost:3000/auth/callback?code=&state=xyz"
-        code = url.split('code=')[1].split('&')[0] if 'code=' in url else ''
+        code = url.split("code=")[1].split("&")[0] if "code=" in url else ""
 
         # Should handle empty code
-        assert code == ''
+        assert code == ""
 
     def test_rapid_sign_in_sign_out_cycles(self):
         """Test rapid sign-in and sign-out cycles."""
@@ -733,7 +714,7 @@ class TestEdgeCases:
         incomplete_user = {
             "id": "user-123",
             "email": "user@example.com",
-            "user_metadata": {}  # Empty metadata
+            "user_metadata": {},  # Empty metadata
         }
 
         # Should handle gracefully
