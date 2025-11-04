@@ -1,7 +1,15 @@
 name: Python CI
 
 on:
-  [push, pull_request]
+  push:
+    branches: [ "development" ]
+  pull_request:
+    branches: [ "development" ]
+  
+  # This adds the 8-hour scheduled run
+  schedule:
+    # Runs "at minute 0 past every 8th hour" (UTC time)
+    - cron: '0 */8 * * *'
 
 jobs:
   build-and-test:
@@ -19,6 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          # Added black and flake8
           pip install -r requirements.txt
         working-directory: ./proj2/backend
 
@@ -29,21 +38,34 @@ jobs:
           echo "OPENAI_API_KEY=fake_key" >> .env
         working-directory: ./proj2/backend
 
-      # --- THIS IS THE UPDATED STEP ---
+      # --- NEW LINTING AND FORMATTING STEPS ---
+      - name: Lint with Flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings.
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        working-directory: ./proj2/backend
+
+      - name: Check formatting with Black
+        run: |
+          black --check .
+        working-directory: ./proj2/backend
+      # --- END OF NEW STEPS ---
+
       - name: Run tests and generate coverage report
         run: |
-          # Step 1: Run pytest under the 'coverage' tool, specifying all your source files
-          coverage run --source=app,run,extensions,ai_service,restaurantRoutes,cartRoutes,routes_ai -m pytest
+          # Step 1: Run pytest under the 'coverage' tool
+          # I also fixed the filenames to match your refactor
+          coverage run --source=app,run,extensions,ai_service,routes_restaurant,routes_cart,routes_ai -m pytest
           
           # Step 2: Generate the XML report that Codecov needs
           coverage xml
         working-directory: ./proj2/backend
-      # --- END OF UPDATE ---
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-          # This path is still correct, as "coverage xml" creates coverage.xml
           file: ./proj2/backend/coverage.xml
