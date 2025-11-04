@@ -21,6 +21,7 @@ from ai_service import get_ai_recommendations, _format_restaurants_for_ai
 # FIXTURES AND MOCK DATA
 # =============================================================================
 
+
 @pytest.fixture
 def sample_restaurants():
     """Sample restaurant data with menu items."""
@@ -36,7 +37,7 @@ def sample_restaurants():
                     "description": "Fresh mozzarella and basil",
                     "category": "Pizza",
                     "price": 12.99,
-                    "image_url": "/dishes/pizza.jpg"
+                    "image_url": "/dishes/pizza.jpg",
                 },
                 {
                     "id": 2,
@@ -44,9 +45,9 @@ def sample_restaurants():
                     "description": "Creamy pasta with bacon",
                     "category": "Pasta",
                     "price": 14.99,
-                    "image_url": "/dishes/carbonara.jpg"
-                }
-            ]
+                    "image_url": "/dishes/carbonara.jpg",
+                },
+            ],
         },
         {
             "id": 2,
@@ -59,7 +60,7 @@ def sample_restaurants():
                     "description": "Crab, avocado, cucumber",
                     "category": "Sushi",
                     "price": 8.99,
-                    "image_url": "/dishes/california-roll.jpg"
+                    "image_url": "/dishes/california-roll.jpg",
                 },
                 {
                     "id": 4,
@@ -67,38 +68,40 @@ def sample_restaurants():
                     "description": "Fresh raw salmon slices",
                     "category": "Sashimi",
                     "price": 15.99,
-                    "image_url": "https://example.com/salmon.jpg"
-                }
-            ]
-        }
+                    "image_url": "https://example.com/salmon.jpg",
+                },
+            ],
+        },
     ]
 
 
 @pytest.fixture
 def sample_ai_response():
     """Sample AI response JSON."""
-    return json.dumps([
-        {
-            "id": 1,
-            "title": "Margherita Pizza",
-            "description": "This classic comfort food will lift your spirits with its warm, cheesy goodness.",
-            "image": "https://xoworgfijegojldelcjv.supabase.co/storage/v1/object/public/dishes/pizza.jpg",
-            "price": 12.99,
-            "distance": 2,
-            "rating": 4.5,
-            "category": "Pizza"
-        },
-        {
-            "id": 2,
-            "title": "Pasta Carbonara",
-            "description": "Rich and creamy pasta perfect for when you need some indulgence.",
-            "image": "https://xoworgfijegojldelcjv.supabase.co/storage/v1/object/public/dishes/carbonara.jpg",
-            "price": 14.99,
-            "distance": 2,
-            "rating": 4.7,
-            "category": "Pasta"
-        }
-    ])
+    return json.dumps(
+        [
+            {
+                "id": 1,
+                "title": "Margherita Pizza",
+                "description": "This classic comfort food will lift your spirits with its warm, cheesy goodness.",
+                "image": "https://xoworgfijegojldelcjv.supabase.co/storage/v1/object/public/dishes/pizza.jpg",
+                "price": 12.99,
+                "distance": 2,
+                "rating": 4.5,
+                "category": "Pizza",
+            },
+            {
+                "id": 2,
+                "title": "Pasta Carbonara",
+                "description": "Rich and creamy pasta perfect for when you need some indulgence.",
+                "image": "https://xoworgfijegojldelcjv.supabase.co/storage/v1/object/public/dishes/carbonara.jpg",
+                "price": 14.99,
+                "distance": 2,
+                "rating": 4.7,
+                "category": "Pasta",
+            },
+        ]
+    )
 
 
 @pytest.fixture
@@ -113,6 +116,7 @@ def mock_openai_completion():
 # =============================================================================
 # RESTAURANT FORMATTING TESTS
 # =============================================================================
+
 
 class TestFormatRestaurantsForAI:
     """Test suite for restaurant data formatting."""
@@ -157,11 +161,7 @@ class TestFormatRestaurantsForAI:
 
     def test_format_restaurant_without_menu_items(self):
         """Test formatting restaurant with no menu items."""
-        restaurant = {
-            "id": 1,
-            "name": "Empty Restaurant",
-            "address": "123 Test St"
-        }
+        restaurant = {"id": 1, "name": "Empty Restaurant", "address": "123 Test St"}
         result = _format_restaurants_for_ai([restaurant])
 
         assert "Restaurant: Empty Restaurant" in result
@@ -173,7 +173,7 @@ class TestFormatRestaurantsForAI:
             "id": 1,
             "name": "Empty Menu",
             "address": "123 Test St",
-            "menu_items": []
+            "menu_items": [],
         }
         result = _format_restaurants_for_ai([restaurant])
 
@@ -182,22 +182,14 @@ class TestFormatRestaurantsForAI:
 
     def test_format_handles_missing_name(self):
         """Test formatting handles missing restaurant name gracefully."""
-        restaurant = {
-            "id": 1,
-            "address": "123 Test St",
-            "menu_items": []
-        }
+        restaurant = {"id": 1, "address": "123 Test St", "menu_items": []}
         result = _format_restaurants_for_ai([restaurant])
 
         assert "Restaurant: Unknown" in result
 
     def test_format_handles_missing_address(self):
         """Test formatting handles missing address gracefully."""
-        restaurant = {
-            "id": 1,
-            "name": "Test Restaurant",
-            "menu_items": []
-        }
+        restaurant = {"id": 1, "name": "Test Restaurant", "menu_items": []}
         result = _format_restaurants_for_ai([restaurant])
 
         assert "Restaurant: Test Restaurant" in result
@@ -213,7 +205,7 @@ class TestFormatRestaurantsForAI:
                     # Missing most fields
                     "id": 1
                 }
-            ]
+            ],
         }
         result = _format_restaurants_for_ai([restaurant])
 
@@ -240,12 +232,12 @@ class TestFormatRestaurantsForAI:
                 {
                     "id": 1,
                     "name": "Chef's Special",
-                    "description": "It's the \"best\" dish!",
+                    "description": 'It\'s the "best" dish!',
                     "category": "Entrées",
                     "price": 19.99,
-                    "image_url": "/dishes/special.jpg"
+                    "image_url": "/dishes/special.jpg",
                 }
-            ]
+            ],
         }
         result = _format_restaurants_for_ai([restaurant])
 
@@ -259,16 +251,17 @@ class TestFormatRestaurantsForAI:
 # AI RECOMMENDATIONS TESTS
 # =============================================================================
 
+
 class TestGetAIRecommendations:
     """Test suite for AI recommendations generation."""
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_successful_recommendation_generation(
         self,
         mock_client,
         sample_restaurants,
         sample_ai_response,
-        mock_openai_completion
+        mock_openai_completion,
     ):
         """Test successful AI recommendation generation."""
         mock_openai_completion.choices[0].message.content = sample_ai_response
@@ -283,13 +276,13 @@ class TestGetAIRecommendations:
         assert "supabase.co" in result[0]["image"]
         mock_client.chat.completions.create.assert_called_once()
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_with_different_moods(
         self,
         mock_client,
         sample_restaurants,
         sample_ai_response,
-        mock_openai_completion
+        mock_openai_completion,
     ):
         """Test recommendations with various mood inputs."""
         mock_openai_completion.choices[0].message.content = sample_ai_response
@@ -306,13 +299,13 @@ class TestGetAIRecommendations:
             prompt = call_args[1]["messages"][1]["content"]
             assert mood in prompt
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_prompt_structure(
         self,
         mock_client,
         sample_restaurants,
         sample_ai_response,
-        mock_openai_completion
+        mock_openai_completion,
     ):
         """Test that the prompt includes all required components."""
         mock_openai_completion.choices[0].message.content = sample_ai_response
@@ -335,13 +328,13 @@ class TestGetAIRecommendations:
         assert "Italian Bistro" in prompt
         assert "Margherita Pizza" in prompt
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_api_parameters(
         self,
         mock_client,
         sample_restaurants,
         sample_ai_response,
-        mock_openai_completion
+        mock_openai_completion,
     ):
         """Test that OpenAI API is called with correct parameters."""
         mock_openai_completion.choices[0].message.content = sample_ai_response
@@ -354,24 +347,29 @@ class TestGetAIRecommendations:
         assert call_args[1]["temperature"] == 0.7
         assert call_args[1]["max_tokens"] == 2000
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_handles_markdown_json(
-        self,
-        mock_client,
-        sample_restaurants,
-        mock_openai_completion
+        self, mock_client, sample_restaurants, mock_openai_completion
     ):
         """Test handling of JSON wrapped in markdown code blocks."""
-        markdown_response = "```json\n" + json.dumps([{
-            "id": 1,
-            "title": "Test Dish",
-            "description": "Test",
-            "image": "/test.jpg",
-            "price": 10.0,
-            "distance": 2,
-            "rating": 4.5,
-            "category": "Test"
-        }]) + "\n```"
+        markdown_response = (
+            "```json\n"
+            + json.dumps(
+                [
+                    {
+                        "id": 1,
+                        "title": "Test Dish",
+                        "description": "Test",
+                        "image": "/test.jpg",
+                        "price": 10.0,
+                        "distance": 2,
+                        "rating": 4.5,
+                        "category": "Test",
+                    }
+                ]
+            )
+            + "\n```"
+        )
 
         mock_openai_completion.choices[0].message.content = markdown_response
         mock_client.chat.completions.create.return_value = mock_openai_completion
@@ -382,24 +380,29 @@ class TestGetAIRecommendations:
         assert len(result) == 1
         assert result[0]["title"] == "Test Dish"
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_handles_plain_markdown_blocks(
-        self,
-        mock_client,
-        sample_restaurants,
-        mock_openai_completion
+        self, mock_client, sample_restaurants, mock_openai_completion
     ):
         """Test handling of JSON wrapped in plain markdown blocks."""
-        markdown_response = "```\n" + json.dumps([{
-            "id": 1,
-            "title": "Test Dish",
-            "description": "Test",
-            "image": "/test.jpg",
-            "price": 10.0,
-            "distance": 2,
-            "rating": 4.5,
-            "category": "Test"
-        }]) + "\n```"
+        markdown_response = (
+            "```\n"
+            + json.dumps(
+                [
+                    {
+                        "id": 1,
+                        "title": "Test Dish",
+                        "description": "Test",
+                        "image": "/test.jpg",
+                        "price": 10.0,
+                        "distance": 2,
+                        "rating": 4.5,
+                        "category": "Test",
+                    }
+                ]
+            )
+            + "\n```"
+        )
 
         mock_openai_completion.choices[0].message.content = markdown_response
         mock_client.chat.completions.create.return_value = mock_openai_completion
@@ -409,13 +412,13 @@ class TestGetAIRecommendations:
         assert isinstance(result, list)
         assert len(result) == 1
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_strips_whitespace(
         self,
         mock_client,
         sample_restaurants,
         sample_ai_response,
-        mock_openai_completion
+        mock_openai_completion,
     ):
         """Test that response whitespace is properly stripped."""
         response_with_whitespace = "  \n\n" + sample_ai_response + "\n\n  "
@@ -427,12 +430,9 @@ class TestGetAIRecommendations:
         assert isinstance(result, list)
         assert len(result) == 2
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_with_empty_restaurant_list(
-        self,
-        mock_client,
-        sample_ai_response,
-        mock_openai_completion
+        self, mock_client, sample_ai_response, mock_openai_completion
     ):
         """Test recommendations with empty restaurant list."""
         mock_openai_completion.choices[0].message.content = sample_ai_response
@@ -445,12 +445,9 @@ class TestGetAIRecommendations:
         prompt = call_args[1]["messages"][1]["content"]
         assert "happy" in prompt
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_invalid_json_response(
-        self,
-        mock_client,
-        sample_restaurants,
-        mock_openai_completion
+        self, mock_client, sample_restaurants, mock_openai_completion
     ):
         """Test error handling for invalid JSON response."""
         mock_openai_completion.choices[0].message.content = "Invalid JSON{]"
@@ -459,12 +456,8 @@ class TestGetAIRecommendations:
         with pytest.raises(json.JSONDecodeError):
             get_ai_recommendations("happy", sample_restaurants)
 
-    @patch('ai_service.openai_client')
-    def test_recommendation_openai_api_error(
-        self,
-        mock_client,
-        sample_restaurants
-    ):
+    @patch("ai_service.openai_client")
+    def test_recommendation_openai_api_error(self, mock_client, sample_restaurants):
         """Test handling of OpenAI API errors."""
         mock_client.chat.completions.create.side_effect = Exception("API Error")
 
@@ -473,12 +466,9 @@ class TestGetAIRecommendations:
 
         assert "API Error" in str(exc_info.value)
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_empty_response(
-        self,
-        mock_client,
-        sample_restaurants,
-        mock_openai_completion
+        self, mock_client, sample_restaurants, mock_openai_completion
     ):
         """Test handling of empty AI response."""
         mock_openai_completion.choices[0].message.content = ""
@@ -487,13 +477,13 @@ class TestGetAIRecommendations:
         with pytest.raises(json.JSONDecodeError):
             get_ai_recommendations("happy", sample_restaurants)
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_with_long_mood_text(
         self,
         mock_client,
         sample_restaurants,
         sample_ai_response,
-        mock_openai_completion
+        mock_openai_completion,
     ):
         """Test recommendations with lengthy mood description."""
         long_mood = "I'm feeling very happy and excited because it's a beautiful day and I just got great news and I want to celebrate with some amazing food that will make me feel even better!"
@@ -510,13 +500,13 @@ class TestGetAIRecommendations:
         prompt = call_args[1]["messages"][1]["content"]
         assert long_mood in prompt
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_recommendation_validates_response_structure(
         self,
         mock_client,
         sample_restaurants,
         sample_ai_response,
-        mock_openai_completion
+        mock_openai_completion,
     ):
         """Test that response has expected structure."""
         mock_openai_completion.choices[0].message.content = sample_ai_response
@@ -539,27 +529,29 @@ class TestGetAIRecommendations:
 # IMAGE URL TRANSFORMATION TESTS
 # =============================================================================
 
+
 class TestImageURLHandling:
     """Test suite for image URL handling in AI responses."""
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_relative_image_url_transformation(
-        self,
-        mock_client,
-        sample_restaurants,
-        mock_openai_completion
+        self, mock_client, sample_restaurants, mock_openai_completion
     ):
         """Test that relative image URLs are transformed to full URLs."""
-        response = json.dumps([{
-            "id": 1,
-            "title": "Test Dish",
-            "description": "Test description",
-            "image": "https://xoworgfijegojldelcjv.supabase.co/storage/v1/object/public/dishes/test.jpg",
-            "price": 10.0,
-            "distance": 2,
-            "rating": 4.5,
-            "category": "Test"
-        }])
+        response = json.dumps(
+            [
+                {
+                    "id": 1,
+                    "title": "Test Dish",
+                    "description": "Test description",
+                    "image": "https://xoworgfijegojldelcjv.supabase.co/storage/v1/object/public/dishes/test.jpg",
+                    "price": 10.0,
+                    "distance": 2,
+                    "rating": 4.5,
+                    "category": "Test",
+                }
+            ]
+        )
 
         mock_openai_completion.choices[0].message.content = response
         mock_client.chat.completions.create.return_value = mock_openai_completion
@@ -569,24 +561,25 @@ class TestImageURLHandling:
         assert "supabase.co" in result[0]["image"]
         assert result[0]["image"].startswith("https://")
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_absolute_image_url_preserved(
-        self,
-        mock_client,
-        sample_restaurants,
-        mock_openai_completion
+        self, mock_client, sample_restaurants, mock_openai_completion
     ):
         """Test that absolute image URLs are preserved."""
-        response = json.dumps([{
-            "id": 1,
-            "title": "Test Dish",
-            "description": "Test",
-            "image": "https://example.com/image.jpg",
-            "price": 10.0,
-            "distance": 2,
-            "rating": 4.5,
-            "category": "Test"
-        }])
+        response = json.dumps(
+            [
+                {
+                    "id": 1,
+                    "title": "Test Dish",
+                    "description": "Test",
+                    "image": "https://example.com/image.jpg",
+                    "price": 10.0,
+                    "distance": 2,
+                    "rating": 4.5,
+                    "category": "Test",
+                }
+            ]
+        )
 
         mock_openai_completion.choices[0].message.content = response
         mock_client.chat.completions.create.return_value = mock_openai_completion
@@ -600,16 +593,17 @@ class TestImageURLHandling:
 # INTEGRATION TESTS
 # =============================================================================
 
+
 class TestAIServiceIntegration:
     """Integration tests for complete AI service workflow."""
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_end_to_end_recommendation_flow(
         self,
         mock_client,
         sample_restaurants,
         sample_ai_response,
-        mock_openai_completion
+        mock_openai_completion,
     ):
         """Test complete flow from mood input to recommendations output."""
         mock_openai_completion.choices[0].message.content = sample_ai_response
@@ -636,13 +630,13 @@ class TestAIServiceIntegration:
             assert isinstance(rec["rating"], (int, float))
             assert isinstance(rec["category"], str)
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_multiple_sequential_requests(
         self,
         mock_client,
         sample_restaurants,
         sample_ai_response,
-        mock_openai_completion
+        mock_openai_completion,
     ):
         """Test multiple sequential recommendation requests."""
         mock_openai_completion.choices[0].message.content = sample_ai_response
@@ -663,22 +657,23 @@ class TestAIServiceIntegration:
 # EDGE CASES AND ERROR HANDLING
 # =============================================================================
 
+
 class TestEdgeCases:
     """Test suite for edge cases and boundary conditions."""
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_special_characters_in_mood(
         self,
         mock_client,
         sample_restaurants,
         sample_ai_response,
-        mock_openai_completion
+        mock_openai_completion,
     ):
         """Test handling of special characters in mood text."""
         mock_openai_completion.choices[0].message.content = sample_ai_response
         mock_client.chat.completions.create.return_value = mock_openai_completion
 
-        special_mood = "I'm feeling \"great\" & ready for food! 😊"
+        special_mood = 'I\'m feeling "great" & ready for food! 😊'
         result = get_ai_recommendations(special_mood, sample_restaurants)
 
         assert isinstance(result, list)
@@ -688,37 +683,43 @@ class TestEdgeCases:
         prompt = call_args[1]["messages"][1]["content"]
         assert special_mood in prompt
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_unicode_characters_in_restaurant_data(
-        self,
-        mock_client,
-        mock_openai_completion
+        self, mock_client, mock_openai_completion
     ):
         """Test handling of unicode characters in restaurant data."""
-        restaurants_with_unicode = [{
-            "id": 1,
-            "name": "Café français",
-            "address": "123 Rue de la Paix",
-            "menu_items": [{
+        restaurants_with_unicode = [
+            {
                 "id": 1,
-                "name": "Crème brûlée",
-                "description": "Délicieux dessert",
-                "category": "Desserts",
-                "price": 8.50,
-                "image_url": "/dishes/creme.jpg"
-            }]
-        }]
+                "name": "Café français",
+                "address": "123 Rue de la Paix",
+                "menu_items": [
+                    {
+                        "id": 1,
+                        "name": "Crème brûlée",
+                        "description": "Délicieux dessert",
+                        "category": "Desserts",
+                        "price": 8.50,
+                        "image_url": "/dishes/creme.jpg",
+                    }
+                ],
+            }
+        ]
 
-        response = json.dumps([{
-            "id": 1,
-            "title": "Crème brûlée",
-            "description": "Perfect sweet treat",
-            "image": "/placeholder.jpg",
-            "price": 8.50,
-            "distance": 2,
-            "rating": 4.5,
-            "category": "Desserts"
-        }])
+        response = json.dumps(
+            [
+                {
+                    "id": 1,
+                    "title": "Crème brûlée",
+                    "description": "Perfect sweet treat",
+                    "image": "/placeholder.jpg",
+                    "price": 8.50,
+                    "distance": 2,
+                    "rating": 4.5,
+                    "category": "Desserts",
+                }
+            ]
+        )
 
         mock_openai_completion.choices[0].message.content = response
         mock_client.chat.completions.create.return_value = mock_openai_completion
@@ -728,12 +729,9 @@ class TestEdgeCases:
         assert isinstance(result, list)
         assert result[0]["title"] == "Crème brûlée"
 
-    @patch('ai_service.openai_client')
+    @patch("ai_service.openai_client")
     def test_large_restaurant_dataset(
-        self,
-        mock_client,
-        sample_ai_response,
-        mock_openai_completion
+        self, mock_client, sample_ai_response, mock_openai_completion
     ):
         """Test performance with large restaurant dataset."""
         # Create 50 restaurants with 10 items each
@@ -750,9 +748,10 @@ class TestEdgeCases:
                         "description": f"Description {j}",
                         "category": "Category",
                         "price": 10.0 + j,
-                        "image_url": f"/dishes/dish{j}.jpg"
-                    } for j in range(10)
-                ]
+                        "image_url": f"/dishes/dish{j}.jpg",
+                    }
+                    for j in range(10)
+                ],
             }
             large_dataset.append(restaurant)
 
@@ -778,12 +777,14 @@ class TestEdgeCases:
                     "description": None,
                     "category": None,
                     "price": None,
-                    "image_url": None
+                    "image_url": None,
                 }
-            ]
+            ],
         }
 
         result = _format_restaurants_for_ai([restaurant])
 
         # Should not crash and should use defaults
-        assert "Unknown" in result or result  # Either uses "Unknown" or handles gracefully
+        assert (
+            "Unknown" in result or result
+        )  # Either uses "Unknown" or handles gracefully
