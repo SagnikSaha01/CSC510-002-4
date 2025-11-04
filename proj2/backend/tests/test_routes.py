@@ -625,7 +625,7 @@ def test_create_restaurant_menu_items_fail_rollback(client, mocker):
     )
 
     call_count = [0]
-    
+
     def table_side_effect(table_name):
         call_count[0] += 1
         if call_count[0] == 1:  # restaurants insert
@@ -677,7 +677,7 @@ def test_create_restaurant_exception_rollback(client, mocker):
     )
 
     call_count = [0]
-    
+
     def table_side_effect(table_name):
         call_count[0] += 1
         if call_count[0] == 1:  # restaurants insert
@@ -686,7 +686,9 @@ def test_create_restaurant_exception_rollback(client, mocker):
             return chain
         elif call_count[0] == 2:  # menu_items insert - throws exception
             chain = MagicMock()
-            chain.insert.return_value.execute.side_effect = Exception("Unexpected error")
+            chain.insert.return_value.execute.side_effect = Exception(
+                "Unexpected error"
+            )
             return chain
         else:  # restaurants delete (rollback)
             return mock_delete_chain
@@ -709,7 +711,9 @@ def test_create_restaurant_exception_no_rollback_needed(client, mocker):
     }
 
     mock_chain = MagicMock()
-    mock_chain.insert.return_value.execute.side_effect = Exception("Early database error")
+    mock_chain.insert.return_value.execute.side_effect = Exception(
+        "Early database error"
+    )
 
     mocker.patch("restaurantRoutes.supabase.table", return_value=mock_chain)
 
@@ -869,7 +873,7 @@ def test_get_recommendations_json_decode_error(client, mocker):
     Test POST /api/recommendations when AI service returns invalid JSON (500).
     """
     import json as json_module
-    
+
     request_payload = {"mood": "happy"}
 
     mock_restaurants_data = [
@@ -905,7 +909,9 @@ def test_get_recommendations_database_error(client, mocker):
     request_payload = {"mood": "happy"}
 
     mock_chain = MagicMock()
-    mock_chain.select.return_value.execute.side_effect = Exception("Database connection lost")
+    mock_chain.select.return_value.execute.side_effect = Exception(
+        "Database connection lost"
+    )
 
     mocker.patch("restaurantRoutes.supabase.table", return_value=mock_chain)
 
@@ -1037,6 +1043,7 @@ def test_get_recommendations_empty_result(client, mocker):
 # --- Integration-style Tests ---
 # ----------------------------------------------------
 
+
 def test_get_all_then_get_single_restaurant(client, mocker):
     """
     Test getting all restaurants then getting a single one (integration-style).
@@ -1064,7 +1071,7 @@ def test_get_all_then_get_single_restaurant(client, mocker):
     ]
 
     call_count = [0]
-    
+
     def table_side_effect(table_name):
         call_count[0] += 1
         if call_count[0] == 1:  # GET all
@@ -1073,7 +1080,9 @@ def test_get_all_then_get_single_restaurant(client, mocker):
             return chain
         else:  # GET single
             chain = MagicMock()
-            chain.select.return_value.eq.return_value.execute.return_value = mock_single_response
+            chain.select.return_value.eq.return_value.execute.return_value = (
+                mock_single_response
+            )
             return chain
 
     mocker.patch("restaurantRoutes.supabase.table", side_effect=table_side_effect)
