@@ -76,7 +76,8 @@ jobs:
         working-directory: ./proj2/frontend
 
       - name: Run frontend tests with coverage
-        run: pnpm test -- --coverage --coverageReporters=lcov
+        run: |
+          pnpm test __tests__ --coverage --coverageReporters=lcov --ci
         working-directory: ./proj2/frontend
 
       - name: Upload backend coverage to Codecov
