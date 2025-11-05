@@ -16,6 +16,7 @@ interface SwipeCardProps {
   isFavorite?: boolean
   onSwipe: (direction: "left" | "right") => void
   onToggleFavorite?: (id: number) => void
+  onOrder?: (id: number) => void
 }
 
 export interface SwipeCardRef {
@@ -35,6 +36,7 @@ const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>((props, ref) => {
     isFavorite = false,
     onSwipe,
     onToggleFavorite,
+    onOrder,
   } = props
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [rotation, setRotation] = useState(0)
@@ -230,7 +232,13 @@ const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>((props, ref) => {
                     />
                   </svg>
                 </button>
-                <button className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-semibold hover:bg-primary/90 transition-colors">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onOrder?.(id)
+                  }}
+                  className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-semibold hover:bg-primary/90 transition-colors"
+                >
                   Order
                 </button>
               </div>
