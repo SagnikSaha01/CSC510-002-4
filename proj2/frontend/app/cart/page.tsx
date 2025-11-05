@@ -17,6 +17,8 @@ interface CartItem {
 export default function CartPage() {
   const [items, setItems] = useState<CartItem[]>([])
   const [isLoadingCart, setIsLoadingCart] = useState(true)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  const [isCheckingOut, setIsCheckingOut] = useState(false)
   const { fetchCart, addToCart, removeFromCart, isLoading } = useCart()
   const { user } = useAuth()
 
@@ -95,6 +97,34 @@ export default function CartPage() {
       }))
       setItems(transformedItems)
     }
+  }
+
+  const handleCheckout = async () => {
+    if (!user || items.length === 0) return
+
+    setIsCheckingOut(true)
+
+    try {
+      // Remove all items from cart
+      for (const item of items) {
+        await removeFromCart(item.menu_item_id, user.id)
+      }
+
+      // Clear local state
+      setItems([])
+      
+      // Show success dialog
+      setShowSuccessDialog(true)
+    } catch (error) {
+      console.error("Checkout failed:", error)
+      alert("Checkout failed. Please try again.")
+    } finally {
+      setIsCheckingOut(false)
+    }
+  }
+
+  const closeSuccessDialog = () => {
+    setShowSuccessDialog(false)
   }
 
   const total = useMemo(() => items.reduce((sum, it) => sum + it.price * it.quantity, 0), [items])
@@ -194,11 +224,61 @@ export default function CartPage() {
                   <span>${total.toFixed(2)}</span>
                 </div>
 
-                <button className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors">
-                  Checkout
+                <button 
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut}
+                  className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isCheckingOut ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    "Checkout"
+                  )}
                 </button>
               </div>
             </aside>
+          </div>
+        )}
+
+        {/* Success Dialog */}
+        {showSuccessDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-card rounded-lg border border-border p-8 max-w-md w-full shadow-2xl">
+              <div className="text-center">
+                {/* Success Icon */}
+                <div className="mx-auto w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+
+                <h2 className="text-2xl font-bold text-foreground mb-2">Order Successful!</h2>
+                <p className="text-muted-foreground mb-6">
+                  Your order has been placed successfully. Thank you for choosing Vibe Eats!
+                </p>
+
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={closeSuccessDialog}
+                    className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                  >
+                    Continue Shopping
+                  </button>
+                  <a
+                    href="/"
+                    className="w-full px-4 py-3 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:bg-secondary/90 transition-colors text-center"
+                  >
+                    Back to Home
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
