@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
-import { supabase } from "@/lib/supabase"
 
 interface Dish {
   id: string
@@ -21,9 +20,8 @@ interface Dish {
 export default function RestaurantSetup() {
   const [restaurantName, setRestaurantName] = useState("")
   const [address, setAddress] = useState("")
-  const [bannerImageURL, setBannerImageURL] = useState<File | null>(null)
+  const [bannerImage, setBannerImage] = useState<File | null>(null)
   const [bannerPreview, setBannerPreview] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
   const [dishes, setDishes] = useState<Dish[]>([
     {
       id: "1",
@@ -39,7 +37,7 @@ export default function RestaurantSetup() {
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setBannerImageURL(file)
+      setBannerImage(file)
       const reader = new FileReader()
       reader.onloadend = () => {
         setBannerPreview(reader.result as string)
@@ -88,112 +86,34 @@ export default function RestaurantSetup() {
     )
   }
 
-  const uploadImage = async (file: File, path: string): Promise<string | null> => {
-    try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random()}.${fileExt}`
-      const filePath = `${path}/${fileName}`
-
-      const { data, error } = await supabase.storage
-        .from('restaurant-images')
-        .upload(filePath, file)
-
-      if (error) {
-        console.error('Upload error:', error)
-        throw error
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('restaurant-images')
-        .getPublicUrl(filePath)
-
-      return publicUrl
-    } catch (error) {
-      console.error('Error uploading image:', error)
-      return null
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsUploading(true)
-
-    try {
-      // Upload banner image
-      let bannerUrl = null
-      if (bannerImageURL) {
-        bannerUrl = await uploadImage(bannerImageURL, 'banners')
-        if (!bannerUrl) {
-          throw new Error('Failed to upload banner image')
-        }
-      }
-
-      // Upload dish images
-      const dishesWithUrls = await Promise.all(
-        dishes.map(async (dish) => {
-          let imageUrl = null
-          if (dish.image) {
-            imageUrl = await uploadImage(dish.image, 'dishes')
-            if (!imageUrl) {
-              throw new Error(`Failed to upload image for ${dish.name}`)
-            }
-          }
-          return {
-            name: dish.name,
-            description: dish.description,
-            price: dish.price,
-            category: dish.category,
-            image_url: imageUrl,
-          }
-        })
-      )
-
-      // Send data to backend
-      const formData = {
-        name: restaurantName,
-        address: address,
-        banner_image_url: bannerUrl,
-        menu_items: dishesWithUrls,
-      }
-
-      console.log("Restaurant Profile Data:", formData)
-
-      const response = await fetch("http://localhost:5000/api/restaurants", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(`HTTP ${response.status}: ${error.error || response.statusText}`)
-      }
-
-      const data = await response.json()
-      console.log("Success:", data)
-      alert("Restaurant profile created successfully!")
-
-      // Reset form
-      setRestaurantName("")
-      setAddress("")
-      setBannerImageURL(null)
-      setBannerPreview(null)
-      setDishes([{
-        id: "1",
-        name: "",
-        description: "",
-        price: 0,
-        category: "",
-        image: null,
-        imagePreview: null,
-      }])
-    } catch (error) {
-      console.error("Error:", error)
-      alert(`Failed to create restaurant: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    } finally {
-      setIsUploading(false)
+    // Here you would send the data to your backend
+    const formData = {
+      restaurantName,
+      address,
+      bannerImage,
+      dishes: dishes.map((dish) => ({
+        name: dish.name,
+        description: dish.description,
+        price: dish.price,
+        category: dish.category,
+        image: dish.image,
+      })),
     }
+    console.log("Restaurant Profile Data:", formData)
+
+    const response = await fetch("http://localhost:5000/api/restaurants", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData)
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    }
+
+    alert("Restaurant profile created! (Check console for data)")
   }
 
   return (
@@ -395,10 +315,9 @@ export default function RestaurantSetup() {
             <div className="flex justify-center">
               <Button
                 type="submit"
-                disabled={isUploading}
-                className="px-12 py-6 text-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-12 py-6 text-lg bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                {isUploading ? "Uploading images and creating profile..." : "Create Restaurant Profile"}
+                Create Restaurant Profile
               </Button>
             </div>
           </form>
