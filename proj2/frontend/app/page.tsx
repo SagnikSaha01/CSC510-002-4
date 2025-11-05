@@ -6,6 +6,8 @@ import MoodInput from "@/components/mood-input"
 import FilterModal from "@/components/filter-modal"
 import SwipeStack from "@/components/swipe-stack"
 import { useRecommendations, type Recommendation } from "@/hooks/use-recommendations"
+import { useCart } from "@/hooks/use-cart"
+import { useAuth } from "@/contexts/auth-context"
 
 
 export default function Home() {
@@ -20,8 +22,11 @@ export default function Home() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [orderSuccess, setOrderSuccess] = useState<string | null>(null)
 
   const { favorites, toggleFavorite, isFavorite } = useRecommendations()
+  const { addToCart } = useCart()
+  const { user } = useAuth()
 
   // Fetch AI recommendations when mood changes
   useEffect(() => {
@@ -48,9 +53,10 @@ export default function Home() {
           // Transform backend dish data to frontend format
           const transformed = data.recommendations.map((dish: any) => ({
             id: dish.id,
-            title: dish.name,
+            menu_item_id: dish.menu_item_id,
+            title: dish.title || dish.name,
             description: dish.description,
-            image: dish.image_url,
+            image: dish.image || dish.image_url,
             price: dish.price,
             distance: dish.distance || 0,
             rating: dish.rating || 0,
@@ -76,6 +82,32 @@ export default function Home() {
   const handleFilterChange = (newFilters: typeof filters) => {
     setFilters(newFilters)
     setAllSwipedOut(false)
+  }
+
+  const handleOrder = async (dishId: number) => {
+    if (!user) {
+      setOrderSuccess("Please sign in to add items to cart")
+      setTimeout(() => setOrderSuccess(null), 3000)
+      return
+    }
+
+    // Find the recommendation to get the menu_item_id
+    const recommendation = recommendations.find(rec => rec.id === dishId)
+    if (!recommendation?.menu_item_id) {
+      setOrderSuccess("Unable to add item: missing menu item ID")
+      setTimeout(() => setOrderSuccess(null), 3000)
+      return
+    }
+
+    try {
+      await addToCart(recommendation.menu_item_id, user.id)
+      setOrderSuccess("Item added to cart!")
+      setTimeout(() => setOrderSuccess(null), 3000)
+    } catch (err) {
+      console.error("Error adding to cart:", err)
+      setOrderSuccess("Failed to add item to cart")
+      setTimeout(() => setOrderSuccess(null), 3000)
+    }
   }
 
   // Filter recommendations based on filters
@@ -145,6 +177,15 @@ export default function Home() {
           onFilterChange={handleFilterChange}
         />
 
+        {/* Order success notification */}
+        {orderSuccess && (
+          <div className="max-w-2xl mx-auto mb-4">
+            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-center">
+              <p className="text-green-600 dark:text-green-400 font-semibold">{orderSuccess}</p>
+            </div>
+          </div>
+        )}
+
         {/* Swipe stack */}
         <div className="max-w-2xl mx-auto mb-16">
           {allSwipedOut ? (
@@ -163,6 +204,7 @@ export default function Home() {
               isFavorite={isFavorite}
               onToggleFavorite={toggleFavorite}
               onEmpty={() => setAllSwipedOut(true)}
+              onOrder={handleOrder}
             />
           )}
         </div>

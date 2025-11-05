@@ -9,9 +9,10 @@ interface SwipeStackProps {
   isFavorite: (id: number) => boolean
   onToggleFavorite: (id: number) => void
   onEmpty: () => void
+  onOrder?: (id: number) => void
 }
 
-export default function SwipeStack({ recommendations, isFavorite, onToggleFavorite, onEmpty }: SwipeStackProps) {
+export default function SwipeStack({ recommendations, isFavorite, onToggleFavorite, onEmpty, onOrder }: SwipeStackProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [swipedCards, setSwipedCards] = useState<{ id: number; direction: "left" | "right" }[]>([])
   const cardRef = useRef<SwipeCardRef>(null)
@@ -88,6 +89,7 @@ export default function SwipeStack({ recommendations, isFavorite, onToggleFavori
           isFavorite={isFavorite(currentCard.id)}
           onSwipe={handleSwipe}
           onToggleFavorite={onToggleFavorite}
+          onOrder={onOrder}
         />
       </div>
 
