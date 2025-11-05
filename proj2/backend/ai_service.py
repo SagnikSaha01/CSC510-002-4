@@ -33,6 +33,8 @@ If no image_url exists, use "/placeholder.jpg".
   {{
     "id": <a unique number for each dish>,
     "menu_item_id": "<use the menu_item_id UUID from the list>",
+    "restaurant_id": "<use the restaurant_id from the menu item>",
+    "restaurant_name": "<use the restaurant name from the list>",
     "title": "<actual dish name from the list>",
     "description": "<why this specific dish matches their mood in 1-2 sentences>",
     "image": "<full image URL from database or /placeholder.jpg>",
@@ -82,7 +84,9 @@ def _format_restaurants_for_ai(restaurants):
     """Format restaurant data for the AI prompt."""
     formatted = []
     for restaurant in restaurants:
-        restaurant_info = f"Restaurant: {restaurant.get('name', 'Unknown')} - {restaurant.get('address', '')}"
+        restaurant_id = restaurant.get("id", "")
+        restaurant_name = restaurant.get("name", "Unknown")
+        restaurant_info = f"Restaurant: {restaurant_name} [restaurant_id: {restaurant_id}] - {restaurant.get('address', '')}"
         if "menu_items" in restaurant and restaurant["menu_items"]:
             dishes = []
             for item in restaurant["menu_items"]:

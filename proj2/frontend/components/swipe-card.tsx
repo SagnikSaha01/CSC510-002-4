@@ -3,9 +3,12 @@
 import type React from "react"
 
 import { useState, useRef, useImperativeHandle, forwardRef } from "react"
+import Link from "next/link"
 
 interface SwipeCardProps {
   id: number
+  restaurant_id?: string
+  restaurant_name?: string
   title: string
   description: string
   image: string
@@ -26,6 +29,8 @@ export interface SwipeCardRef {
 const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>((props, ref) => {
   const {
     id,
+    restaurant_id,
+    restaurant_name,
     title,
     description,
     image,
@@ -196,6 +201,15 @@ const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>((props, ref) => {
         <div className="h-1/2 p-6 flex flex-col justify-between overflow-y-auto">
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-2">{title}</h2>
+            {restaurant_name && restaurant_id && (
+              <Link
+                href={`/restaurant/${restaurant_id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-block text-sm font-medium text-primary hover:text-primary/80 hover:underline transition-colors mb-2"
+              >
+                🍽️ {restaurant_name}
+              </Link>
+            )}
             <p className="text-muted-foreground text-base mb-4">{description}</p>
           </div>
 
