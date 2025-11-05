@@ -95,3 +95,24 @@ jobs:
           fail_ci_if_error: false
           files: ./proj2/frontend/coverage/lcov.info
           flags: frontend
+
+      # --- NEW PACKAGE BUILD & PUBLISH STEPS ---
+      - name: Install packaging tools
+        run: |
+          python -m pip install --upgrade build twine
+        working-directory: ./proj2/backend
+
+      - name: Build Python package
+        run: |
+          python -m build
+        working-directory: ./proj2/backend
+
+      - name: Publish to PyPI (on push to development)
+        if: github.ref == 'refs/heads/development'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          python -m twine upload dist/*
+        working-directory: ./proj2/backend
+      # --- END PACKAGE STEPS ---
