@@ -67,8 +67,6 @@ def create_restaurant():
     try:
         data = request.get_json()
 
-        print(data)
-
         if not data or not data.get("name"):
             return jsonify({"error": "Restaurant name is required"}), 400
 
