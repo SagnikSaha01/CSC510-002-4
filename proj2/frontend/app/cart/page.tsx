@@ -1,30 +1,101 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import Header from "@/components/header"
+import { useCart } from "@/hooks/use-cart"
+import { useAuth } from "@/contexts/auth-context"
 
 interface CartItem {
-  id: number
+  id: string
   title: string
   price: number
   image?: string
   quantity: number
+  menu_item_id: string
 }
 
-const mockCart: CartItem[] = [
-  { id: 1, title: "Mediterranean Bowl", price: 12.99, image: "/mediterranean-bowl-healthy-food.jpg", quantity: 1 },
-  { id: 2, title: "Gourmet Burger", price: 15.99, image: "/gourmet-burger.jpg", quantity: 2 },
-  { id: 3, title: "Sushi Platter", price: 18.99, image: "/sushi-platter.jpg", quantity: 1 },
-]
-
 export default function CartPage() {
-  const [items, setItems] = useState<CartItem[]>(mockCart)
+  const [items, setItems] = useState<CartItem[]>([])
+  const [isLoadingCart, setIsLoadingCart] = useState(true)
+  const { fetchCart, addToCart, removeFromCart, isLoading } = useCart()
+  const { user } = useAuth()
 
-  const updateQuantity = (id: number, qty: number) => {
-    setItems((prev) => prev.map((it) => (it.id === id ? { ...it, quantity: Math.max(1, qty) } : it)))
+  // Load cart data on mount
+  useEffect(() => {
+    const loadCart = async () => {
+      if (!user) {
+        setIsLoadingCart(false)
+        return
+      }
+
+      try {
+        const cartData = await fetchCart(user.id)
+        // Transform backend cart data to frontend format
+        const transformedItems: CartItem[] = cartData.map((item: any) => ({
+          id: item.id,
+          menu_item_id: item.menu_items.id,
+          title: item.menu_items.name,
+          price: item.menu_items.price,
+          image: item.menu_items.image_url,
+          quantity: item.quantity,
+        }))
+        setItems(transformedItems)
+      } catch (error) {
+        console.error("Failed to load cart:", error)
+      } finally {
+        setIsLoadingCart(false)
+      }
+    }
+
+    loadCart()
+  }, [user, fetchCart])
+
+  const updateQuantity = async (id: string, qty: number) => {
+    if (!user) return
+    
+    const item = items.find(it => it.id === id)
+    if (!item) return
+
+    try {
+      // Optimistically update UI
+      setItems((prev) => prev.map((it) => (it.id === id ? { ...it, quantity: Math.max(1, qty) } : it)))
+      
+      // Update backend
+      await addToCart(item.menu_item_id, user.id, Math.max(1, qty))
+    } catch (error) {
+      console.error("Failed to update quantity:", error)
+      // Revert on error
+      await fetchCart(user.id)
+    }
   }
 
-  const removeItem = (id: number) => setItems((prev) => prev.filter((it) => it.id !== id))
+  const removeItem = async (id: string) => {
+    if (!user) return
+    
+    const item = items.find(it => it.id === id)
+    if (!item) return
+
+    try {
+      // Optimistically update UI
+      setItems((prev) => prev.filter((it) => it.id !== id))
+      
+      // Remove from backend
+      await removeFromCart(item.menu_item_id, user.id)
+    } catch (error) {
+      console.error("Failed to remove item:", error)
+      // Reload cart on error
+      const cartData = await fetchCart(user.id)
+      const transformedItems: CartItem[] = cartData.map((item: any) => ({
+        id: item.id,
+        menu_item_id: item.menu_items.id,
+        title: item.menu_items.name,
+        price: item.menu_items.price,
+        image: item.menu_items.image_url,
+        quantity: item.quantity,
+      }))
+      setItems(transformedItems)
+    }
+  }
 
   const total = useMemo(() => items.reduce((sum, it) => sum + it.price * it.quantity, 0), [items])
 
@@ -35,10 +106,28 @@ export default function CartPage() {
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-foreground mb-6">Your Cart</h1>
 
-        {items.length === 0 ? (
+        {!user ? (
+          <div className="p-8 bg-card rounded-lg border border-border text-center">
+            <p className="text-muted-foreground mb-4">Please sign in to view your cart.</p>
+            <a href="/login" className="text-primary hover:underline">Go to Login</a>
+          </div>
+        ) : isLoadingCart ? (
+          <div className="p-8 bg-card rounded-lg border border-border text-center">
+            <div className="flex items-center justify-center gap-2">
+              <svg className="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p className="text-muted-foreground">Loading your cart...</p>
+            </div>
+          </div>
+        ) : items.length === 0 ? (
           <div className="p-8 bg-card rounded-lg border border-border text-center">
             <p className="text-muted-foreground mb-4">Your cart is empty.</p>
             <p className="text-sm text-muted-foreground">Add some tasty items from recommendations!</p>
+            <a href="/" className="inline-block mt-4 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+              Browse Recommendations
+            </a>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
