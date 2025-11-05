@@ -7,69 +7,6 @@ import FilterModal from "@/components/filter-modal"
 import SwipeStack from "@/components/swipe-stack"
 import { useRecommendations, type Recommendation } from "@/hooks/use-recommendations"
 
-// Mock data - in a real app, this would come from an AI API
-const mockRecommendations: Recommendation[] = [
-  {
-    id: 1,
-    title: "Mediterranean Bowl",
-    description: "Fresh, healthy ingredients with olive oil, herbs, and sunshine flavors",
-    image: "/mediterranean-bowl-healthy-food.jpg",
-    price: 12.99,
-    distance: 2.3,
-    rating: 4.8,
-    category: "Healthy",
-  },
-  {
-    id: 2,
-    title: "Comfort Pasta",
-    description: "Creamy, warm pasta with rich sauce and fresh parmesan",
-    image: "/comfort-pasta-italian.jpg",
-    price: 14.99,
-    distance: 1.8,
-    rating: 4.6,
-    category: "Italian",
-  },
-  {
-    id: 3,
-    title: "Spicy Thai Curry",
-    description: "Bold, aromatic curry with coconut milk and fresh vegetables",
-    image: "/spicy-thai-curry.jpg",
-    price: 13.99,
-    distance: 3.1,
-    rating: 4.7,
-    category: "Thai",
-  },
-  {
-    id: 4,
-    title: "Gourmet Burger",
-    description: "Premium beef patty with artisan toppings and special sauce",
-    image: "/gourmet-burger.jpg",
-    price: 15.99,
-    distance: 2.5,
-    rating: 4.5,
-    category: "American",
-  },
-  {
-    id: 5,
-    title: "Sushi Platter",
-    description: "Assorted fresh sushi rolls with wasabi and ginger",
-    image: "/sushi-platter.jpg",
-    price: 18.99,
-    distance: 4.2,
-    rating: 4.9,
-    category: "Japanese",
-  },
-  {
-    id: 6,
-    title: "Vegan Buddha Bowl",
-    description: "Colorful mix of quinoa, roasted vegetables, and tahini dressing",
-    image: "/vegan-buddha-bowl.jpg",
-    price: 11.99,
-    distance: 2.8,
-    rating: 4.4,
-    category: "Vegan",
-  },
-]
 
 export default function Home() {
   const [mood, setMood] = useState("")
@@ -80,7 +17,7 @@ export default function Home() {
     rating: 3.5,
   })
   const [allSwipedOut, setAllSwipedOut] = useState(false)
-  const [recommendations, setRecommendations] = useState<Recommendation[]>(mockRecommendations)
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -89,15 +26,12 @@ export default function Home() {
   // Fetch AI recommendations when mood changes
   useEffect(() => {
     const fetchRecommendations = async () => {
-      // Only fetch if mood is not empty and has at least 3 characters
       if (!mood || mood.trim().length < 3) {
-        setRecommendations(mockRecommendations)
+        setRecommendations([])
         return
       }
-
       setIsLoading(true)
       setError(null)
-
       try {
         const response = await fetch("http://localhost:5000/api/recommendations", {
           method: "POST",
@@ -106,32 +40,36 @@ export default function Home() {
           },
           body: JSON.stringify({ mood: mood.trim() }),
         })
-
         if (!response.ok) {
           throw new Error(`Failed to fetch recommendations: ${response.statusText}`)
         }
-
         const data = await response.json()
-
         if (data.recommendations && Array.isArray(data.recommendations)) {
-          setRecommendations(data.recommendations)
-          setAllSwipedOut(false) // Reset swipe state when new recommendations arrive
+          // Transform backend dish data to frontend format
+          const transformed = data.recommendations.map((dish: any) => ({
+            id: dish.id,
+            title: dish.name,
+            description: dish.description,
+            image: dish.image_url,
+            price: dish.price,
+            distance: dish.distance || 0,
+            rating: dish.rating || 0,
+            category: dish.category || ""
+          }))
+          setRecommendations(transformed)
+          setAllSwipedOut(false)
         } else {
           throw new Error("Invalid response format")
         }
       } catch (err) {
         console.error("Error fetching recommendations:", err)
         setError(err instanceof Error ? err.message : "Failed to fetch recommendations")
-        // Fall back to mock data on error
-        setRecommendations(mockRecommendations)
+        setRecommendations([])
       } finally {
         setIsLoading(false)
       }
     }
-
-    // Debounce the API call - wait 1 second after user stops typing
     const timeoutId = setTimeout(fetchRecommendations, 1000)
-
     return () => clearTimeout(timeoutId)
   }, [mood])
 
