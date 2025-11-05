@@ -54,6 +54,8 @@ export default function Home() {
           const transformed = data.recommendations.map((dish: any) => ({
             id: dish.id,
             menu_item_id: dish.menu_item_id,
+            restaurant_id: dish.restaurant_id,
+            restaurant_name: dish.restaurant_name,
             title: dish.title || dish.name,
             description: dish.description,
             image: dish.image || dish.image_url,

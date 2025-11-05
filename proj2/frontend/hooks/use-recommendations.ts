@@ -5,6 +5,8 @@ import { useState, useEffect } from "react"
 export interface Recommendation {
   id: number
   menu_item_id?: string
+  restaurant_id?: string
+  restaurant_name?: string
   title: string
   description: string
   image: string

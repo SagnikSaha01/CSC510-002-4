@@ -5,8 +5,12 @@ import { useParams } from "next/navigation"
 import Header from "@/components/header"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { MapPin, Star } from "lucide-react"
+import { MapPin, Star, ShoppingCart, Check } from "lucide-react"
+import { useCart } from "@/hooks/use-cart"
+import { useAuth } from "@/contexts/auth-context"
+import { useToast } from "@/hooks/use-toast"
 
 interface MenuItem {
   id: string
@@ -31,6 +35,10 @@ export default function RestaurantDetailPage() {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [addedItems, setAddedItems] = useState<Set<string>>(new Set())
+  const { addToCart } = useCart()
+  const { user } = useAuth()
+  const { toast } = useToast()
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -71,6 +79,47 @@ export default function RestaurantDetailPage() {
       fetchRestaurant()
     }
   }, [params.id])
+
+  const handleAddToCart = async (menuItemId: string, itemName: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to add items to your cart",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      await addToCart(menuItemId, user.id)
+
+      // Add to the set of added items for visual feedback
+      setAddedItems(prev => new Set(prev).add(menuItemId))
+
+      // Show success toast with green styling
+      toast({
+        title: "✓ Added to cart",
+        description: `${itemName} has been added to your cart`,
+        className: "bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800",
+      })
+
+      // Remove the added state after 2 seconds
+      setTimeout(() => {
+        setAddedItems(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(menuItemId)
+          return newSet
+        })
+      }, 2000)
+    } catch (err) {
+      console.error("Error adding to cart:", err)
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart",
+        variant: "destructive",
+      })
+    }
+  }
 
   if (loading) {
     return (
@@ -180,43 +229,80 @@ export default function RestaurantDetailPage() {
                   {category}
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {items.map((item) => (
                     <Card
                       key={item.id}
-                      className="overflow-hidden hover:shadow-lg transition-shadow duration-300 border-border/50"
+                      className="group overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm"
                     >
                       {/* Dish Image */}
-                      {item.image_url && (
-                        <div className="relative w-full h-48">
+                      {item.image_url ? (
+                        <div className="relative w-full h-40 overflow-hidden">
                           <Image
                             src={item.image_url}
                             alt={item.name}
                             fill
-                            className="object-cover"
+                            className="object-cover group-hover:scale-110 transition-transform duration-300"
                           />
+                          <div className="absolute top-2 right-2">
+                            <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-primary/20">
+                              ${item.price.toFixed(2)}
+                            </Badge>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative w-full h-40 bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                          <div className="absolute top-2 right-2">
+                            <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-primary/20">
+                              ${item.price.toFixed(2)}
+                            </Badge>
+                          </div>
+                          <span className="text-4xl opacity-30">🍽️</span>
                         </div>
                       )}
 
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-semibold text-lg line-clamp-1">
-                            {item.name}
-                          </h4>
-                          <Badge variant="outline" className="ml-2 shrink-0">
-                            ${item.price.toFixed(2)}
-                          </Badge>
+                      <CardContent className="p-3 space-y-2">
+                        <div className="space-y-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="font-semibold text-base line-clamp-1 flex-1">
+                              {item.name}
+                            </h4>
+                          </div>
+
+                          {item.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                              {item.description}
+                            </p>
+                          )}
                         </div>
 
-                        {item.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {item.description}
-                          </p>
-                        )}
+                        <div className="flex items-center justify-between gap-2 pt-1">
+                          <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                            {item.category}
+                          </Badge>
 
-                        <Badge variant="secondary" className="text-xs">
-                          {item.category}
-                        </Badge>
+                          <Button
+                            onClick={() => handleAddToCart(item.id, item.name)}
+                            size="sm"
+                            className={`h-8 px-3 gap-1.5 text-xs transition-all ${
+                              addedItems.has(item.id)
+                                ? "bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
+                                : ""
+                            }`}
+                          >
+                            {addedItems.has(item.id) ? (
+                              <>
+                                <Check className="w-3.5 h-3.5" />
+                                Added
+                              </>
+                            ) : (
+                              <>
+                                <ShoppingCart className="w-3.5 h-3.5" />
+                                Add
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
