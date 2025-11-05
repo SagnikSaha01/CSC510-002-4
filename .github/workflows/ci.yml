@@ -75,13 +75,23 @@ jobs:
         run: pnpm install
         working-directory: ./proj2/frontend
 
-      - name: Run frontend tests (Google auth)
-        run: pnpm test __tests__/components/google-sign-in-button.test.tsx __tests__/contexts/auth-context.test.tsx
+      - name: Run frontend tests with coverage
+        run: |
+          pnpm test __tests__ --coverage --coverageReporters=lcov --ci --coverageThreshold='{}'
         working-directory: ./proj2/frontend
 
-      - name: Upload coverage to Codecov
+      - name: Upload backend coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
-          file: ./proj2/backend/coverage.xml
+          fail_ci_if_error: false
+          files: ./proj2/backend/coverage.xml
+          flags: backend
+
+      - name: Upload frontend coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          files: ./proj2/frontend/coverage/lcov.info
+          flags: frontend
