@@ -10,7 +10,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:coverage:auth": "jest --coverage --collectCoverageFrom='contexts/auth-context.tsx' --collectCoverageFrom='components/google-sign-in-button.tsx'"
+    "test:coverage:auth": "jest --coverage --collectCoverageFrom='contexts/auth-context.tsx' --collectCoverageFrom='components/google-sign-in-button.tsx'",
+    "test:cart": "jest __tests__/app/cart/page.test.tsx",
+    "test:cart:coverage": "jest __tests__/app/cart/page.test.tsx --coverage --collectCoverageFrom='app/cart/page.tsx'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
