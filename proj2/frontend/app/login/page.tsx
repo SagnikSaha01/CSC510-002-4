@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
 import { GoogleSignInButton } from '@/components/google-sign-in-button'
 
-export default function LoginPage() {
+function LoginPageContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -83,5 +83,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div data-testid="page-container" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5">
+        <div data-testid="loading-spinner" className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <LoginPageContent />
+    </Suspense>
   )
 }
