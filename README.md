@@ -17,6 +17,8 @@ Our goal is to help users discover dishes and restaurants that match how they’
 # Vibe Eats Demo
 https://youtu.be/QWazXbEpnXs
 
+![Developer Advertisement](https://github.com/SagnikSaha01/CSC510-002-4/blob/main/proj2/documentation/download.MP4?raw=true)
+
 By: Sagnik Saha, Jackson Mock, Aadhir Sandeep, Frank Lin
 
 ---
