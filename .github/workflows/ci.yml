@@ -2,9 +2,9 @@ name: Python CI
 
 on:
   push:
-    branches: [ "development" ]
+    branches: [ "main", "development" ]
   pull_request:
-    branches: [ "development" ]
+    branches: [ "main", "development" ]
   
   # This adds the 8-hour scheduled run
   schedule:
