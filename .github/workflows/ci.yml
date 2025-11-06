@@ -67,6 +67,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -95,3 +96,56 @@ jobs:
           fail_ci_if_error: false
           files: ./proj2/frontend/coverage/lcov.info
           flags: frontend
+
+      # --- FRONTEND PACKAGE AUTO-VERSION & PUBLISH STEPS ---
+      - name: Auto-update npm package version
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          npm version patch --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "Bumped version from $CURRENT_VERSION to $NEW_VERSION"
+        working-directory: ./proj2/frontend
+
+      - name: Build frontend for npm
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        run: |
+          pnpm run build
+        working-directory: ./proj2/frontend
+
+      - name: Publish to npm
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          pnpm publish --access public --no-git-checks
+        working-directory: ./proj2/frontend
+      # --- END FRONTEND PACKAGE STEPS ---
+
+      # --- PACKAGE BUILD & PUBLISH WITH AUTO-VERSIONING ---
+      - name: Fetch all tags for version calculation
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        run: |
+          git fetch --prune --unshallow --tags
+
+      - name: Install packaging tools
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        run: |
+          python -m pip install --upgrade build twine setuptools-scm
+        working-directory: ./proj2/backend
+
+      - name: Build Python package
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        run: |
+          python -m build
+        working-directory: ./proj2/backend
+
+      - name: Publish to PyPI
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          python -m twine upload dist/*
+        working-directory: ./proj2/backend
+      # --- END PACKAGE STEPS ---

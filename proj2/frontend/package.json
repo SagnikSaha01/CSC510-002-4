@@ -1,7 +1,13 @@
 {
-  "name": "my-v0-project",
+  "name": "vibe-eats-frontend",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "main": ".next/standalone/server.js",
+  "files": [
+    ".next/standalone",
+    ".next/static",
+    "public"
+  ],
   "scripts": {
     "build": "next build",
     "dev": "next dev",

@@ -9,3 +9,5 @@ openai
 # Code Quality & Formatting
 flake8
 black
+# Build & Versioning
+setuptools-scm
