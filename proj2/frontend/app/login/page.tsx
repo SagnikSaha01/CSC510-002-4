@@ -19,16 +19,16 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div data-testid="page-container" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5">
+        <div data-testid="loading-spinner" className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5 px-4">
+    <div data-testid="page-container" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5 px-4">
       <div className="w-full max-w-md">
-        <div className="bg-card border border-border rounded-2xl shadow-2xl p-8 space-y-6">
+        <div data-testid="login-card" className="bg-card border border-border rounded-2xl shadow-2xl p-8 space-y-6">
           {/* Logo/Brand Section */}
           <div className="text-center space-y-2">
             <h1 className="text-4xl font-bold text-foreground">Vibe Eats</h1>

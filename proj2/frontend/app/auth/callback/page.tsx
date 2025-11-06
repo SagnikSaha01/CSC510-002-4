@@ -33,9 +33,14 @@ export default function AuthCallback() {
   }, [router])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5">
+    <div data-testid="auth-callback-container" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5">
       <div className="text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+        <div 
+          data-testid="loading-spinner"
+          role="status"
+          aria-label="Loading"
+          className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"
+        ></div>
         <p className="text-lg text-muted-foreground">Completing sign in...</p>
       </div>
     </div>
