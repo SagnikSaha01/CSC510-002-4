@@ -177,7 +177,7 @@ Please review [`CONTRIBUTING.md`](https://github.com/SagnikSaha01/CSC510-002-4/b
 ---
 
 ## License
-This project is licensed under the **MIT License**.
+This project is licensed under the **Apache 2.0 License**.
 See [`LICENSE.md`](https://github.com/SagnikSaha01/CSC510-002-4/blob/main/LICENSE.md) for details.
 
 ---
