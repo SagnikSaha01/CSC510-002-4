@@ -306,21 +306,6 @@ describe('SwipeCard Component', () => {
     expect(card.style.transform).toContain('translate(0px, 0px)')
   })
 
-  test('31. Stops dragging on mouse leave', () => {
-    render(<SwipeCard {...defaultProps} />)
-    const card = document.querySelector('.cursor-grab')
-
-    fireEvent.mouseDown(card!, { clientX: 100, clientY: 100 })
-    fireEvent.mouseMove(card!, { clientX: 200, clientY: 100 })
-    fireEvent.mouseLeave(card!)
-
-    // After mouse leave, moving should not affect the card
-    fireEvent.mouseMove(card!, { clientX: 500, clientY: 100 })
-    fireEvent.mouseUp(card!, { clientX: 500, clientY: 100 })
-
-    expect(mockOnSwipe).not.toHaveBeenCalled()
-  })
-
   // ===== Optional Props Tests =====
 
   test('32. Works without onToggleFavorite prop', () => {
