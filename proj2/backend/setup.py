@@ -29,7 +29,7 @@ setup(
         "root": "../..",
         "relative_to": __file__,
         "version_scheme": "post-release",
-        "local_scheme": "no-local-version",
+        "local_scheme": "node-and-date",
     },
     setup_requires=["setuptools-scm"],
     description="Backend API for Vibe Eats restaurant application with AI-powered recommendations",
