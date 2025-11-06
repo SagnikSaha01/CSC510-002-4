@@ -59,8 +59,7 @@ Users describe their *vibe* (e.g., “tired and need comfort”), and the system
 ## System Architecture
 **Frontend:** Next.js 16 (TypeScript + Tailwind CSS)  
 **Backend:** Flask 3 (Python 3.11 + Supabase SDK + OpenAI API)  
-**Database:** Supabase (PostgreSQL + Storage)  
-**Hosting:** Cloud or Docker-based container deployment  
+**Database:** Supabase (PostgreSQL + Storage)    
 
 ---
 
