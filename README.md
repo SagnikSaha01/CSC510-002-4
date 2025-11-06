@@ -18,7 +18,7 @@ Our goal is to help users discover dishes and restaurants that match how they’
 https://youtu.be/QWazXbEpnXs
 
 
-![](https://github.com/user-attachments/assets/958949b9-b952-45ad-9b1d-96b66d7dff47)
+https://github.com/user-attachments/assets/958949b9-b952-45ad-9b1d-96b66d7dff47
 
 
 ![Developer Advertisement](https://github.com/SagnikSaha01/CSC510-002-4/blob/main/proj2/documentation/download.MP4?raw=true)
