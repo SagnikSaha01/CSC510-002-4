@@ -80,15 +80,43 @@ python run.py
 ```
 ## 3. Running Tests
 
-This project uses pytest for backend testing.
+This project includes **backend tests** (Python) and **frontend tests** (JavaScript/TypeScript).
 
-### Ensure Virtual Environment is Active
+### 3.1 Backend Testing (pytest)
 
-Ensure your backend virtual environment is active (see step 2.3).
+#### Ensure Virtual Environment is Active
+Make sure your backend virtual environment is activated before running tests (see step 2.3).
 
-### Run Tests
-
-This command will discover and run all the automated tests.
+#### Run Backend Tests
+This command will automatically discover and run all backend tests:
 ```bash
 pytest
+```
+
+### 3.2 Frontend Testing (Jest)
+
+The frontend uses **Jest** for unit and component testing.
+
+### Install pnpm
+
+From the frontend project directory
+
+```bash
+npm install -g pnpm
+```
+
+#### Install Dependencies
+
+From the frontend project directory:
+
+```bash
+pnpm install
+```
+
+### Run Frontend Tests
+
+To execute all Jest tests, run:
+
+```bash
+pnpm test
 ```
