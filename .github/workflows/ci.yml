@@ -138,9 +138,21 @@ jobs:
           python -m pip install --upgrade build twine setuptools-scm
         working-directory: ./proj2/backend
 
-      - name: Build Python package
+      - name: Generate unique version with timestamp
         if: github.ref == 'refs/heads/development' && github.event_name == 'push'
         run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          echo "0.1.0.post${TIMESTAMP}" > _version.txt
+        working-directory: ./proj2/backend
+
+      - name: Build Python package
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        env:
+          SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VIBE_EATS_BACKEND: ${{ github.run_number }}
+        run: |
+          VERSION=$(cat _version.txt)
+          echo "Building version: $VERSION"
+          sed -i "s/use_scm_version=.*/version='$VERSION',/" setup.py
           python -m build
         working-directory: ./proj2/backend
 
