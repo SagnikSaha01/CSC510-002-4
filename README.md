@@ -14,6 +14,9 @@ Repo for CSC 510 at NCSU
 Welcome to **Vibe Eats**, a mood-based restaurant recommendation and ordering platform.  
 Our goal is to help users discover dishes and restaurants that match how they’re feeling — whether it’s *stressed*, *adventurous*, or *in need of comfort food*.
 
+# Vibe Eats Demo
+https://youtu.be/QWazXbEpnXs
+
 By: Sagnik Saha, Jackson Mock, Aadhir Sandeep, Frank Lin
 
 ---
