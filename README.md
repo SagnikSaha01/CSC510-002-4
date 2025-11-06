@@ -131,10 +131,10 @@ For complete details, view the [Project Management Plan →](https://github.com/
 
 ## Requirements Checklist
 The team follows best practices for **collaboration**, **documentation**, and **quality**:
-- Multiple contributors & frequent commits  
-- Clean auto-generated documentation  
-- CI-based pytest coverage ≥ 30%  
-- `.gitignore`, `LICENSE`, `INSTALL.md`, `CODE_OF_CONDUCT.md`, and `CONTRIBUTING.md`  
+- Multiple contributors & frequent commits
+- Clean auto-generated documentation
+- CI-based pytest coverage ≥ 30%
+- `.gitignore`, [`LICENSE.md`](https://github.com/SagnikSaha01/CSC510-002-4/blob/main/LICENSE.md), [`INSTALL.md`](https://github.com/SagnikSaha01/CSC510-002-4/blob/main/INSTALL.md), [`CODE_OF_CONDUCT.md`](https://github.com/SagnikSaha01/CSC510-002-4/blob/main/CODE_OF_CONDUCT.md), and [`CONTRIBUTING.md`](https://github.com/SagnikSaha01/CSC510-002-4/blob/main/CONTRIBUTING.md)
 - Demo video & badges (Style / Formatter / Coverage / DOI)
 
 Read the full [Project Requirements Checklist →](https://github.com/SagnikSaha01/CSC510-002-4/wiki/Project-requirements-checklist)
@@ -163,14 +163,14 @@ See full [Quickstart Guide →](https://github.com/SagnikSaha01/CSC510-002-4/wik
 ---
 
 ## Contributing
-Contributions are welcome.  
-Please review [`CONTRIBUTING.md`](CONTRIBUTING.md) and open a pull request for improvements.
+Contributions are welcome.
+Please review [`CONTRIBUTING.md`](https://github.com/SagnikSaha01/CSC510-002-4/blob/main/CONTRIBUTING.md) and [`CODE_OF_CONDUCT.md`](https://github.com/SagnikSaha01/CSC510-002-4/blob/main/CODE_OF_CONDUCT.md), then open a pull request for improvements.
 
 ---
 
 ## License
-This project is licensed under the **MIT License**.  
-See [`LICENSE.md`](LICENSE.md) for details.
+This project is licensed under the **MIT License**.
+See [`LICENSE.md`](https://github.com/SagnikSaha01/CSC510-002-4/blob/main/LICENSE.md) for details.
 
 ---
 

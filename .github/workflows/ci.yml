@@ -109,6 +109,9 @@ jobs:
 
       - name: Build frontend for npm
         if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
           pnpm run build
         working-directory: ./proj2/frontend
