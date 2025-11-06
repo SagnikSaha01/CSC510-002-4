@@ -158,7 +158,7 @@ Full version table: [Third-Party Dependencies →](https://github.com/SagnikSaha
 1. Visit the app and describe your current mood.  
 2. Tap **“Get My Vibe”** to receive AI-driven restaurant suggestions.  
 3. Swipe through meal cards, apply filters, and view details.  
-4. (Coming Soon) Add meals to cart and place orders.  
+4. Add meals to cart and place orders.  
 
 See full [Quickstart Guide →](https://github.com/SagnikSaha01/CSC510-002-4/wiki/Quickstart-Guide)
 
