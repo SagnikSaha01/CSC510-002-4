@@ -1,0 +1,159 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ "development" ]
+  pull_request:
+    branches: [ "development" ]
+  
+  # This adds the 8-hour scheduled run
+  schedule:
+    # Runs "at minute 0 past every 8th hour" (UTC time)
+    - cron: '0 */8 * * *'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Added black and flake8
+          pip install -r requirements.txt
+        working-directory: ./proj2/backend
+
+      - name: Create dummy .env file
+        run: |
+          echo "SUPABASE_URL=http://fake.url" >> .env
+          echo "SUPABASE_KEY=fake_key" >> .env
+          echo "OPENAI_API_KEY=fake_key" >> .env
+        working-directory: ./proj2/backend
+
+      # --- NEW LINTING AND FORMATTING STEPS ---
+      - name: Lint with Flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings.
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        working-directory: ./proj2/backend
+
+      - name: Check formatting with Black
+        run: |
+          black --check .
+        working-directory: ./proj2/backend
+      # --- END OF NEW STEPS ---
+
+      - name: Run tests and generate coverage report
+        run: |
+          # Step 1: Run pytest under the 'coverage' tool, specifying all your source files
+          # Including tests for Google auth (backend), AI service, cart routes, and restaurant routes
+          coverage run --source=app,run,extensions,ai_service,restaurantRoutes,cartRoutes,routes_ai -m pytest tests/test_google_auth.py tests/test_ai_service.py tests/test_cart_routes.py tests/test_routes.py
+
+          # Step 2: Generate the XML report that Codecov needs
+          coverage xml
+        working-directory: ./proj2/backend
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install frontend dependencies
+        run: pnpm install
+        working-directory: ./proj2/frontend
+
+      - name: Run frontend tests with coverage
+        run: |
+          pnpm test __tests__ --coverage --coverageReporters=lcov --ci --coverageThreshold='{}'
+        working-directory: ./proj2/frontend
+
+      - name: Upload backend coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          files: ./proj2/backend/coverage.xml
+          flags: backend
+
+      - name: Upload frontend coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          files: ./proj2/frontend/coverage/lcov.info
+          flags: frontend
+
+      # --- FRONTEND PACKAGE AUTO-VERSION & PUBLISH STEPS ---
+      - name: Auto-update npm package version
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          NEW_VERSION="${CURRENT_VERSION}-${TIMESTAMP}"
+          npm version $NEW_VERSION --no-git-tag-version
+          echo "Bumped version from $CURRENT_VERSION to $NEW_VERSION"
+        working-directory: ./proj2/frontend
+
+      - name: Build frontend for npm
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          pnpm run build
+        working-directory: ./proj2/frontend
+
+      - name: Publish to npm
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          pnpm publish --access public --no-git-checks
+        working-directory: ./proj2/frontend
+      # --- END FRONTEND PACKAGE STEPS ---
+
+      # --- PACKAGE BUILD & PUBLISH WITH AUTO-VERSIONING ---
+      - name: Fetch all tags for version calculation
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        run: |
+          git fetch --prune --unshallow --tags
+
+      - name: Install packaging tools
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        run: |
+          python -m pip install --upgrade build twine setuptools-scm
+        working-directory: ./proj2/backend
+
+      - name: Build Python package with timestamp version
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          VERSION="0.1.0.post${TIMESTAMP}"
+          echo "Building version: $VERSION"
+          export SETUPTOOLS_SCM_PRETEND_VERSION=$VERSION
+          python -m build
+        working-directory: ./proj2/backend
+
+      - name: Publish to PyPI
+        if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          python -m twine upload dist/*
+        working-directory: ./proj2/backend
+      # --- END PACKAGE STEPS ---

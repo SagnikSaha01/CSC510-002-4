@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import SwipeCard from "./swipe-card"
+import { useState, useEffect, useRef } from "react"
+import SwipeCard, { type SwipeCardRef } from "./swipe-card"
 import type { Recommendation } from "@/hooks/use-recommendations"
 
 interface SwipeStackProps {
@@ -9,14 +9,18 @@ interface SwipeStackProps {
   isFavorite: (id: number) => boolean
   onToggleFavorite: (id: number) => void
   onEmpty: () => void
+  onOrder?: (id: number) => void
 }
 
-export default function SwipeStack({ recommendations, isFavorite, onToggleFavorite, onEmpty }: SwipeStackProps) {
+export default function SwipeStack({ recommendations, isFavorite, onToggleFavorite, onEmpty, onOrder }: SwipeStackProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [swipedCards, setSwipedCards] = useState<{ id: number; direction: "left" | "right" }[]>([])
+  const cardRef = useRef<SwipeCardRef>(null)
 
   const handleSwipe = (direction: "left" | "right") => {
     const currentCard = recommendations[currentIndex]
+    if (!currentCard) return
+
     setSwipedCards((prev) => [...prev, { id: currentCard.id, direction }])
 
     if (currentIndex + 1 >= recommendations.length) {
@@ -26,7 +30,25 @@ export default function SwipeStack({ recommendations, isFavorite, onToggleFavori
     }
   }
 
-  if (recommendations.length === 0) {
+  // Add keyboard event listener for arrow keys
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (currentIndex >= recommendations.length) return
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault()
+        cardRef.current?.triggerSwipe("left")
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault()
+        cardRef.current?.triggerSwipe("right")
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [currentIndex, recommendations.length])
+
+  if (recommendations.length === 0 || currentIndex >= recommendations.length) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-muted-foreground text-lg">No recommendations available. Try adjusting your filters!</p>
@@ -35,6 +57,14 @@ export default function SwipeStack({ recommendations, isFavorite, onToggleFavori
   }
 
   const currentCard = recommendations[currentIndex]
+
+  if (!currentCard) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <p className="text-muted-foreground text-lg">No more recommendations!</p>
+      </div>
+    )
+  }
 
   return (
     <div className="relative w-full h-96 md:h-[600px]">
@@ -53,11 +83,13 @@ export default function SwipeStack({ recommendations, isFavorite, onToggleFavori
       {/* Current card */}
       <div className="relative w-full h-full">
         <SwipeCard
+          ref={cardRef}
           key={currentCard.id}
           {...currentCard}
           isFavorite={isFavorite(currentCard.id)}
           onSwipe={handleSwipe}
           onToggleFavorite={onToggleFavorite}
+          onOrder={onOrder}
         />
       </div>
 

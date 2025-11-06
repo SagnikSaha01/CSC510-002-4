@@ -1,12 +1,24 @@
 {
-  "name": "my-v0-project",
+  "name": "vibe-eats-frontend",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "main": ".next/standalone/server.js",
+  "files": [
+    ".next/standalone",
+    ".next/static",
+    "public"
+  ],
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
-    "start": "next start"
+    "start": "next start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:coverage:auth": "jest --coverage --collectCoverageFrom='contexts/auth-context.tsx' --collectCoverageFrom='components/google-sign-in-button.tsx'",
+    "test:cart": "jest __tests__/app/cart/page.test.tsx",
+    "test:cart:coverage": "jest __tests__/app/cart/page.test.tsx --coverage --collectCoverageFrom='app/cart/page.tsx'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -37,6 +49,7 @@
     "@radix-ui/react-toggle": "1.1.1",
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "1.1.6",
+    "@supabase/supabase-js": "^2.78.0",
     "@vercel/analytics": "1.3.1",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
@@ -62,12 +75,21 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "msw": "^2.12.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.7"
   }
 }

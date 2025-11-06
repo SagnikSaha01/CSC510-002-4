@@ -1,75 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Header from "@/components/header"
 import MoodInput from "@/components/mood-input"
 import FilterModal from "@/components/filter-modal"
 import SwipeStack from "@/components/swipe-stack"
 import { useRecommendations, type Recommendation } from "@/hooks/use-recommendations"
+import { useCart } from "@/hooks/use-cart"
+import { useAuth } from "@/contexts/auth-context"
 
-// Mock data - in a real app, this would come from an AI API
-const mockRecommendations: Recommendation[] = [
-  {
-    id: 1,
-    title: "Mediterranean Bowl",
-    description: "Fresh, healthy ingredients with olive oil, herbs, and sunshine flavors",
-    image: "/mediterranean-bowl-healthy-food.jpg",
-    price: 12.99,
-    distance: 2.3,
-    rating: 4.8,
-    category: "Healthy",
-  },
-  {
-    id: 2,
-    title: "Comfort Pasta",
-    description: "Creamy, warm pasta with rich sauce and fresh parmesan",
-    image: "/comfort-pasta-italian.jpg",
-    price: 14.99,
-    distance: 1.8,
-    rating: 4.6,
-    category: "Italian",
-  },
-  {
-    id: 3,
-    title: "Spicy Thai Curry",
-    description: "Bold, aromatic curry with coconut milk and fresh vegetables",
-    image: "/spicy-thai-curry.jpg",
-    price: 13.99,
-    distance: 3.1,
-    rating: 4.7,
-    category: "Thai",
-  },
-  {
-    id: 4,
-    title: "Gourmet Burger",
-    description: "Premium beef patty with artisan toppings and special sauce",
-    image: "/gourmet-burger.jpg",
-    price: 15.99,
-    distance: 2.5,
-    rating: 4.5,
-    category: "American",
-  },
-  {
-    id: 5,
-    title: "Sushi Platter",
-    description: "Assorted fresh sushi rolls with wasabi and ginger",
-    image: "/sushi-platter.jpg",
-    price: 18.99,
-    distance: 4.2,
-    rating: 4.9,
-    category: "Japanese",
-  },
-  {
-    id: 6,
-    title: "Vegan Buddha Bowl",
-    description: "Colorful mix of quinoa, roasted vegetables, and tahini dressing",
-    image: "/vegan-buddha-bowl.jpg",
-    price: 11.99,
-    distance: 2.8,
-    rating: 4.4,
-    category: "Vegan",
-  },
-]
 
 export default function Home() {
   const [mood, setMood] = useState("")
@@ -80,16 +19,101 @@ export default function Home() {
     rating: 3.5,
   })
   const [allSwipedOut, setAllSwipedOut] = useState(false)
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [orderSuccess, setOrderSuccess] = useState<string | null>(null)
 
   const { favorites, toggleFavorite, isFavorite } = useRecommendations()
+  const { addToCart } = useCart()
+  const { user } = useAuth()
+
+  // Fetch AI recommendations when mood changes
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      if (!mood || mood.trim().length < 3) {
+        setRecommendations([])
+        return
+      }
+      setIsLoading(true)
+      setError(null)
+      try {
+        const response = await fetch("http://localhost:5000/api/recommendations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ mood: mood.trim() }),
+        })
+        if (!response.ok) {
+          throw new Error(`Failed to fetch recommendations: ${response.statusText}`)
+        }
+        const data = await response.json()
+        if (data.recommendations && Array.isArray(data.recommendations)) {
+          // Transform backend dish data to frontend format
+          const transformed = data.recommendations.map((dish: any) => ({
+            id: dish.id,
+            menu_item_id: dish.menu_item_id,
+            restaurant_id: dish.restaurant_id,
+            restaurant_name: dish.restaurant_name,
+            title: dish.title || dish.name,
+            description: dish.description,
+            image: dish.image || dish.image_url,
+            price: dish.price,
+            distance: dish.distance || 0,
+            rating: dish.rating || 0,
+            category: dish.category || ""
+          }))
+          setRecommendations(transformed)
+          setAllSwipedOut(false)
+        } else {
+          throw new Error("Invalid response format")
+        }
+      } catch (err) {
+        console.error("Error fetching recommendations:", err)
+        setError(err instanceof Error ? err.message : "Failed to fetch recommendations")
+        setRecommendations([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    const timeoutId = setTimeout(fetchRecommendations, 1000)
+    return () => clearTimeout(timeoutId)
+  }, [mood])
 
   const handleFilterChange = (newFilters: typeof filters) => {
     setFilters(newFilters)
     setAllSwipedOut(false)
   }
 
+  const handleOrder = async (dishId: number) => {
+    if (!user) {
+      setOrderSuccess("Please sign in to add items to cart")
+      setTimeout(() => setOrderSuccess(null), 3000)
+      return
+    }
+
+    // Find the recommendation to get the menu_item_id
+    const recommendation = recommendations.find(rec => rec.id === dishId)
+    if (!recommendation?.menu_item_id) {
+      setOrderSuccess("Unable to add item: missing menu item ID")
+      setTimeout(() => setOrderSuccess(null), 3000)
+      return
+    }
+
+    try {
+      await addToCart(recommendation.menu_item_id, user.id)
+      setOrderSuccess("Item added to cart!")
+      setTimeout(() => setOrderSuccess(null), 3000)
+    } catch (err) {
+      console.error("Error adding to cart:", err)
+      setOrderSuccess("Failed to add item to cart")
+      setTimeout(() => setOrderSuccess(null), 3000)
+    }
+  }
+
   // Filter recommendations based on filters
-  const filteredRecommendations = mockRecommendations.filter(
+  const filteredRecommendations = recommendations.filter(
     (rec) => rec.price <= filters.budget && rec.distance <= filters.distance && rec.rating >= filters.rating,
   )
 
@@ -127,9 +151,23 @@ export default function Home() {
               <p className="text-foreground">
                 <span className="font-semibold">Your mood:</span> {mood}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {filteredRecommendations.length} recommendations match your vibe
-              </p>
+              {isLoading ? (
+                <p className="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Finding personalized recommendations...
+                </p>
+              ) : error ? (
+                <p className="text-sm text-destructive mt-1">
+                  {error}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {filteredRecommendations.length} AI-powered recommendations match your vibe
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -140,6 +178,15 @@ export default function Home() {
           filters={filters}
           onFilterChange={handleFilterChange}
         />
+
+        {/* Order success notification */}
+        {orderSuccess && (
+          <div className="max-w-2xl mx-auto mb-4">
+            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-center">
+              <p className="text-green-600 dark:text-green-400 font-semibold">{orderSuccess}</p>
+            </div>
+          </div>
+        )}
 
         {/* Swipe stack */}
         <div className="max-w-2xl mx-auto mb-16">
@@ -159,6 +206,7 @@ export default function Home() {
               isFavorite={isFavorite}
               onToggleFavorite={toggleFavorite}
               onEmpty={() => setAllSwipedOut(true)}
+              onOrder={handleOrder}
             />
           )}
         </div>
@@ -168,7 +216,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto mt-16 pt-8 border-t border-border">
             <h2 className="text-2xl font-bold text-foreground mb-4">Your Favorites ({favorites.length})</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockRecommendations
+              {recommendations
                 .filter((rec) => favorites.includes(rec.id))
                 .map((rec) => (
                   <div key={rec.id} className="p-4 bg-card rounded-lg border border-border">

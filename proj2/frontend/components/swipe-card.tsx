@@ -2,10 +2,13 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useImperativeHandle, forwardRef } from "react"
+import Link from "next/link"
 
 interface SwipeCardProps {
   id: number
+  restaurant_id?: string
+  restaurant_name?: string
   title: string
   description: string
   image: string
@@ -16,27 +19,57 @@ interface SwipeCardProps {
   isFavorite?: boolean
   onSwipe: (direction: "left" | "right") => void
   onToggleFavorite?: (id: number) => void
+  onOrder?: (id: number) => void
 }
 
-export default function SwipeCard({
-  id,
-  title,
-  description,
-  image,
-  price,
-  distance,
-  rating,
-  category,
-  isFavorite = false,
-  onSwipe,
-  onToggleFavorite,
-}: SwipeCardProps) {
+export interface SwipeCardRef {
+  triggerSwipe: (direction: "left" | "right") => void
+}
+
+const SwipeCard = forwardRef<SwipeCardRef, SwipeCardProps>((props, ref) => {
+  const {
+    id,
+    restaurant_id,
+    restaurant_name,
+    title,
+    description,
+    image,
+    price,
+    distance,
+    rating,
+    category,
+    isFavorite = false,
+    onSwipe,
+    onToggleFavorite,
+    onOrder,
+  } = props
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [rotation, setRotation] = useState(0)
   const [opacity, setOpacity] = useState(1)
   const [isDragging, setIsDragging] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const startPos = useRef({ x: 0, y: 0 })
+
+  // Expose triggerSwipe method to parent component
+  useImperativeHandle(ref, () => ({
+    triggerSwipe: (direction: "left" | "right") => {
+      const targetX = direction === "right" ? 500 : -500
+      const targetRotation = direction === "right" ? 25 : -25
+
+      setPosition({ x: targetX, y: 0 })
+      setRotation(targetRotation)
+      setOpacity(0)
+
+      if (direction === "right" && onToggleFavorite) {
+        onToggleFavorite(id)
+      }
+
+      // Wait for animation to complete before calling onSwipe
+      setTimeout(() => {
+        onSwipe(direction)
+      }, 300)
+    }
+  }))
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true)
@@ -168,6 +201,15 @@ export default function SwipeCard({
         <div className="h-1/2 p-6 flex flex-col justify-between overflow-y-auto">
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-2">{title}</h2>
+            {restaurant_name && restaurant_id && (
+              <Link
+                href={`/restaurant/${restaurant_id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-block text-sm font-medium text-primary hover:text-primary/80 hover:underline transition-colors mb-2"
+              >
+                🍽️ {restaurant_name}
+              </Link>
+            )}
             <p className="text-muted-foreground text-base mb-4">{description}</p>
           </div>
 
@@ -204,7 +246,13 @@ export default function SwipeCard({
                     />
                   </svg>
                 </button>
-                <button className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-semibold hover:bg-primary/90 transition-colors">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onOrder?.(id)
+                  }}
+                  className="px-6 py-3 bg-primary text-primary-foreground rounded-full font-semibold hover:bg-primary/90 transition-colors"
+                >
                   Order
                 </button>
               </div>
@@ -214,4 +262,8 @@ export default function SwipeCard({
       </div>
     </div>
   )
-}
+})
+
+SwipeCard.displayName = "SwipeCard"
+
+export default SwipeCard

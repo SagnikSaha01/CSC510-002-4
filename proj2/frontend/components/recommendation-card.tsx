@@ -77,8 +77,11 @@ export default function RecommendationCard({
         {/* Footer */}
         <div className="flex items-center justify-between">
           <span className="text-2xl font-bold text-primary">${price.toFixed(2)}</span>
-          <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors">
-            Order
+          <button
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+            aria-label={`Add ${title} to cart`}
+          >
+            Add to cart
           </button>
         </div>
       </div>

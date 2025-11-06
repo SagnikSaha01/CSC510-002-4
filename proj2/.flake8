@@ -1,0 +1,12 @@
+[flake8]
+# Tell flake8 to ignore these specific error codes.
+# W503 = line break before binary operator (this conflicts with 'black')
+# F401 = 'module' imported but unused (common in __init__.py files)
+# E501 = line too long (black handles this for you)
+ignore = W503, F401, E501, E402
+
+# Also, tell flake8 to not check these folders
+exclude =
+    .git,
+    __pycache__,
+    venv

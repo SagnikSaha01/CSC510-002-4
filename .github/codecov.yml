@@ -1,0 +1,53 @@
+codecov:
+  max_report_age: off
+  require_ci_to_pass: yes
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 0%
+    patch:
+      default:
+        target: auto
+        threshold: 0%
+
+# Ignore patterns - files/folders to exclude from coverage
+ignore:
+  - "proj2/frontend/node_modules/**"
+  - "proj2/frontend/.next/**"
+  - "proj2/frontend/components/**"
+  - "proj2/frontend/contexts/**"
+  - "proj2/frontend/hooks/**"
+  - "proj2/frontend/lib/**"
+  - "proj2/frontend/__tests__/**"
+  - "proj2/frontend/*.config.js"
+  - "proj2/frontend/*.config.ts"
+
+# Only show coverage for these paths
+flags:
+  frontend:
+    paths:
+      - proj2/frontend/app/
+    carryforward: true
+  backend:
+    paths:
+      - proj2/backend/
+    carryforward: true
+
+# Component coverage (optional - groups coverage by component)
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: auto
+  individual_components:
+    - component_id: frontend_app
+      name: Frontend App Directory
+      paths:
+        - proj2/frontend/app/**
+    - component_id: backend
+      name: Backend
+      paths:
+        - proj2/backend/**
