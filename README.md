@@ -6,7 +6,7 @@ Repo for CSC 510 at NCSU
   <a href="https://flake8.pycqa.org/en/latest/"><img src="https://img.shields.io/badge/linting-flake8-brightgreen.svg" alt="Linting: Flake8"></a>
   <a href="https://github.com/SagnikSaha01/CSC510-002-4/actions/workflows/ci.yml"><img src="https://github.com/SagnikSaha01/CSC510-002-4/actions/workflows/ci.yml/badge.svg" alt="Python CI"></a>
   <a href="https://codecov.io/github/SagnikSaha01/CSC510-002-4"><img src="https://codecov.io/github/SagnikSaha01/CSC510-002-4/branch/development/graph/badge.svg?token=GBU37PKCWF" alt="codecov"></a>
-  <a href="https://doi.org/10.5281/zenodo.17529217"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.17529217.svg" alt="DOI"></a>
+  <a href="https://doi.org/10.5281/zenodo.17539273"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.17539273.svg" alt="DOI"></a>
 </p>
 
 # Vibe Eats — Find Food That Matches Your Mood
